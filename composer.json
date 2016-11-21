@@ -1,0 +1,39 @@
+{
+  "name": "lexand/micro-api-framework",
+  "description": "API (or single page application) oriented micro framework",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "authors": [
+	{
+	  "name": "Olexandr Dorogikh",
+	  "email": "dorogikh.alexander@gmail.com"
+	}
+  ],
+  "repositories": [
+	{
+	  "type": "vcs",
+	  "url": "https://github.com/lexand/php-reflection-invoker.git"
+	}
+  ],
+  "autoload": {
+	"psr-4": {
+	  "app\\": [
+		  "app/", "tests/functional/app/"],
+	  "tests\\utils\\": "tests/utils"
+	}
+  },
+  "require": {
+	"monolog/monolog": "1.21.0"
+  },
+  "require-dev": {
+	"guzzlehttp/guzzle": "~6.0",
+	"phpunit/phpunit": "5.5.*",
+	"reflection/invoker": "dev-master",
+	"lox/xhprof": "dev-master"
+  },
+  "scripts": {
+	"test": "phpunit",
+	"post-install-cmd": "find vendor -name '.git' -type d | xargs rm -Rf",
+	"post-update-cmd": "find vendor -name '.git' -type d | xargs rm -Rf"
+  }
+}

@@ -1,0 +1,27 @@
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/5.5/phpunit.xsd"
+         backupGlobals="true"
+         backupStaticAttributes="false"
+         bootstrap="bootstrap.php"
+         cacheTokens="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         forceCoversAnnotation="false"
+         processIsolation="false"
+         stopOnError="false"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         verbose="false">
+    <!--
+    printerClass="PHPUnit_TextUI_ResultPrinter"
+    printerFile="/path/to/ResultPrinter.php"
+    testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader"
+    testSuiteLoaderFile="/path/to/StandardTestSuiteLoader.php"
+    timeoutForSmallTests="1"
+    timeoutForMediumTests="10"
+    timeoutForLargeTests="60"
+    -->
+</phpunit>
