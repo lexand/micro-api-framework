@@ -4,36 +4,38 @@
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
-	{
-	  "name": "Olexandr Dorogikh",
-	  "email": "dorogikh.alexander@gmail.com"
-	}
+    {
+      "name": "Olexandr Dorogikh",
+      "email": "dorogikh.alexander@gmail.com"
+    }
   ],
   "repositories": [
-	{
-	  "type": "vcs",
-	  "url": "https://github.com/lexand/php-reflection-invoker.git"
-	}
+    {
+      "type": "vcs",
+      "url": "https://github.com/lexand/php-reflection-invoker.git"
+    }
   ],
   "autoload": {
-	"psr-4": {
-	  "app\\": [
-		  "app/", "tests/functional/app/"],
-	  "tests\\utils\\": "tests/utils"
-	}
+    "psr-4": {
+      "app\\": [
+        "tests/functional/app/"
+      ],
+      "microapi\\": "microapi/",
+      "tests\\utils\\": "tests/utils"
+    }
   },
   "require": {
-	"monolog/monolog": "1.21.0"
+    "monolog/monolog": "1.21.0"
   },
   "require-dev": {
-	"guzzlehttp/guzzle": "~6.0",
-	"phpunit/phpunit": "5.5.*",
-	"reflection/invoker": "dev-master",
-	"lox/xhprof": "dev-master"
+    "guzzlehttp/guzzle": "~6.0",
+    "phpunit/phpunit": "5.5.*",
+    "reflection/invoker": "dev-master",
+    "lox/xhprof": "dev-master"
   },
   "scripts": {
-	"test": "phpunit",
-	"post-install-cmd": "find vendor -name '.git' -type d | xargs rm -Rf",
-	"post-update-cmd": "find vendor -name '.git' -type d | xargs rm -Rf"
+    "test": "phpunit",
+    "post-install-cmd": "find vendor -name '.git' -type d | xargs rm -Rf",
+    "post-update-cmd": "find vendor -name '.git' -type d | xargs rm -Rf"
   }
 }
