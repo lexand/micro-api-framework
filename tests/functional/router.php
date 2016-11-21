@@ -20,5 +20,5 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
     return false;
 }
 else {
-    require_once APP_ROOT . '/public_html/api.php';
+    require_once APP_ROOT . '/www/api.php';
 }

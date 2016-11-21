@@ -21,7 +21,7 @@ class App {
     const METHOD_POST          = 'post';
     const METHOD_PUT           = 'put';
     const METHOD_GET           = 'get';
-    const SKIP_PATH_COMPONENTS = 1;
+    const SKIP_PATH_COMPONENTS = 0;
 
     /**
      * @var string
@@ -161,7 +161,7 @@ class App {
         // todo: надо сделать так что бы система могла работать как с закешированным мапингом,
         // так и полностью в динамическом режиме (для разработки)
 
-        $fqcn = '\microapi\controller\\' . ucfirst($controllerName) . 'Controller';
+        $fqcn = '\app\controller\\' . ucfirst($controllerName) . 'Controller';
         if (class_exists($fqcn)) {
             /** @var Controller $ctl */
             $ctl = new $fqcn;
@@ -329,7 +329,7 @@ class App {
 
         $parsedUrl = parse_url($this->uri);
         $path      = ltrim($parsedUrl['path'], '//');
-        // пропускаем первые несоклько сомпонентов пути типа /api
+        // skip several components of the URI path, for example /api etc
         $this->uriComponents = array_slice(explode('/', $path), static::SKIP_PATH_COMPONENTS);
     }
 }

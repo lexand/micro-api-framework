@@ -6,7 +6,7 @@
  * Time: 14:14
  */
 
-namespace microapi\controller;
+namespace app\controller;
 
 use GuzzleHttp\Client;
 use tests\utils\TestServer;
@@ -104,9 +104,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
         $size = $body->getSize();
         $body = $body->read($size);
 
-        $json = \GuzzleHttp\json_decode($body, true);
+        echo "RESPONSE:\n" . $body . "\n";
 
-        return $json;
+        return \GuzzleHttp\json_decode($body, true);
     }
 
     public function testPostdto() {

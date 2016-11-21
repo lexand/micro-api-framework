@@ -13,3 +13,7 @@ if ($webUser->isLoggedIn()) {
 else {
     include APP_ROOT . '/views/login.php';
 }
+
+// or you can use
+// $app->dispatch();
+// to handle GET requests or POST requests without DTO objects

@@ -10,10 +10,6 @@ declare(strict_types = 1);
 
 namespace microapi\base;
 
-use microapi\db\DBStmt;
-use microapi\model\User;
-use microapi\secure\Password;
-
 class WebUser {
 
     /**
@@ -37,25 +33,7 @@ class WebUser {
         return null;
     }
 
-    public function login(string $login, string $password) : bool {
-        $user = User::m()->getByLogin($login);
+    public function login(string $login, string $password) : bool {return false;}
 
-        if ($user && Password::comparePassword($password, $user->getPwd())) {
-            $_SESSION['userId'] = $user->getId();
-            $_SESSION['userLogin'] = $login;
-            $user->update(['lastLogin' => new DBStmt('NOW()')]);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public function logout() {
-        if (isset($_SESSION['userId'])) {
-            unset($_SESSION['userId']);
-            unset($_SESSION['userLogin']);
-            session_destroy();
-        }
-    }
+    public function logout() {session_destroy();}
 }

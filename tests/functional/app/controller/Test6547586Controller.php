@@ -6,10 +6,10 @@
  * Time: 13:57
  */
 
-namespace microapi\controller;
+namespace app\controller;
 
 use microapi\base\Controller;
-use microapi\dto\TestDTO;
+use app\dto\TestDTO;
 
 class Test6547586Controller extends Controller {
     public function actionGet() {

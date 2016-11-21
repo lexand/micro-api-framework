@@ -6,7 +6,7 @@
  * Time: 15:10
  */
 
-namespace microapi\dto;
+namespace app\dto;
 
 use microapi\base\DTO;
 
