@@ -8,6 +8,6 @@
 
 require_once(__DIR__ . '/base_app.php');
 
-$app = \microapi\App::get();
+$app = \microapi\Dispatcher::get();
 
 $app->addComp('user', function () use ($cfg){return new \microapi\base\WebUser();});

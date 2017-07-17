@@ -30,8 +30,7 @@
   "require-dev": {
     "guzzlehttp/guzzle": "~6.0",
     "phpunit/phpunit": "5.5.*",
-    "reflection/invoker": "dev-master",
-    "lox/xhprof": "dev-master"
+    "reflection/invoker": "dev-master"
   },
   "scripts": {
     "test": "phpunit",
