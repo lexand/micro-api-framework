@@ -32,6 +32,10 @@ abstract class DTO {
 
     }
 
+    /**
+     * low-level validation
+     * @return bool
+     */
     public function validate() : bool { return true; }
 
     public function addError(string $field, string $error) {
@@ -46,12 +50,12 @@ abstract class DTO {
         if ($field === '') {
             return $this->_errors;
         }
-        elseif (isset($this->_errors[$field])) {
+
+        if (isset($this->_errors[$field])) {
             return $this->_errors[$field];
         }
-        else {
-            return [];
-        }
+
+        return [];
     }
 
 }

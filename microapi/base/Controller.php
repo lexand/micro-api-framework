@@ -6,7 +6,7 @@
  * Time: 16:18
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace microapi\base;
 
@@ -21,13 +21,13 @@ class Controller implements EventDriven {
 
     /**
      * @param string $action
+     * @param array  $params
      * @return bool
-     * @throws \microapi\http\HttpException
      */
-    public function beforeAction(string $action) : bool {
+    public function beforeAction(string $action, array $params = []): bool {
         return $this->trigger(
             'beforeaction',
-            new class($action, $this) extends EventObject {
+            new class($this, $action, $params) extends EventObject {
                 /**
                  * @var string
                  */
@@ -36,19 +36,25 @@ class Controller implements EventDriven {
                  * @var Controller
                  */
                 public $controller;
+                /**
+                 * @var array
+                 */
+                public $params;
 
                 /**
                  *  constructor.
                  *
-                 * @param string     $action
                  * @param Controller $controller
+                 * @param string     $action
+                 * @param array      $params
                  */
-                public function __construct($action, Controller $controller) {
+                public function __construct(Controller $controller, string $action, array $params = []) {
                     $this->action     = $action;
                     $this->controller = $controller;
+                    $this->params     = $params;
                 }
             }
-            )->isSuccess();
+        )->isSuccess();
     }
 
     public function validateInputData(Validator $validator, DTO $object) {

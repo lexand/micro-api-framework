@@ -10,6 +10,6 @@ declare(strict_types=1);
 
 namespace microapi\base\endpoint;
 
-class EndpointActionNotDoundException extends EndpointException {
+class EndpointActionNotFoundException extends EndpointException {
 
 }

@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
-use microapi\base\endpoint\EndpointActionNotDoundException;
+use microapi\base\endpoint\EndpointActionNotFoundException;
 use microapi\base\endpoint\EndpointControllerNotFoundException;
 use microapi\base\endpoint\Endpoint;
 
@@ -73,7 +73,7 @@ class Reflection {
                 }
             }
 
-            throw new EndpointActionNotDoundException("'{$this->action}' not found in '{$this->fqcnCtl}'");
+            throw new EndpointActionNotFoundException("'{$this->action}' not found in '{$this->fqcnCtl}'");
         }
         throw new EndpointControllerNotFoundException("'{$this->fqcnCtl}' not found");
     }
@@ -95,9 +95,10 @@ class Reflection {
             $type    = $pr->getType();
             $argData = [];
 
+            $argData['optional'] = $pr->isOptional();
             if ($type->isBuiltin()) {
                 $argData['type']     = (string)$type;
-                $argData['optional'] = $pr->isOptional();
+                $argData['builtin'] = true;
                 if ($argData['optional']) {
                     if ($pr->isDefaultValueConstant()) {
                         $argData['defaultIsConstant'] = true;
@@ -107,6 +108,13 @@ class Reflection {
                         $argData['defaultIsConstant'] = false;
                         $argData['default']           = $pr->getDefaultValue();
                     }
+                }
+            }
+            else{
+                $argData['builtin'] = false;
+                $argData['type'] = $pr->getClass()->getName();
+                if ($argData['optional']) {
+                    $argData['default'] = null;
                 }
             }
 

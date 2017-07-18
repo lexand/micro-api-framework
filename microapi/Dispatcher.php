@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 namespace microapi;
 
+use microapi\base\DTO;
 use microapi\base\endpoint\Endpoint;
+use microapi\base\endpoint\EndpointCallRejectedException;
 use microapi\base\endpoint\EndpointException;
 use microapi\base\events\EventDriven;
 use microapi\base\events\EventObject;
@@ -47,8 +49,6 @@ class Dispatcher implements EventDriven {
     private static $instance;
 
     private $modulesNamespaces = [];
-
-    private $endpointMapping = [];
 
     private $endpointCachePath = null;
 
@@ -160,9 +160,14 @@ class Dispatcher implements EventDriven {
             throw new \microapi\http\HttpException($_SERVER['REQUEST_URI'], 404);
         }
 
-        // prepare arguments and DTO
+        $params = $this->extractEndpointParams($endpoint);
 
-        $this->afterDispatch($endpoint->call());
+        try {
+            $this->afterDispatch($endpoint->invoke($params));
+        }
+        catch (EndpointCallRejectedException $e){
+            throw new HttpException('request denied', HttpException::FORBIDDEN);
+        }
     }
 
     /**
@@ -190,27 +195,15 @@ class Dispatcher implements EventDriven {
         return $rawPost;
     }
 
+    /**
+     * @return string|null
+     */
     public function getNextUriComponent() {
         if (empty($this->uriComponents)) {
-            throw new \microapi\http\HttpException('incorrect uri');
+            return null;
         }
 
         return array_shift($this->uriComponents);
-    }
-
-    public function extractUrlParams(): array {
-        $params = [];
-
-        try {
-            while (true) {
-                $params[] = $this->getNextUriComponent();
-            }
-        }
-        catch (\microapi\http\HttpException $ignored) {
-
-        }
-
-        return $params;
     }
 
     public static function get() {
@@ -220,13 +213,6 @@ class Dispatcher implements EventDriven {
 
         return static::$instance;
     }
-
-    /**
-     * HTTP method
-     *
-     * @return string
-     */
-    public function getMethod(): string { return $this->method; }
 
     public function log(): \Psr\Log\LoggerInterface {
         if ($this->logger === null) {
@@ -282,7 +268,7 @@ class Dispatcher implements EventDriven {
                  *
                  * @param $endpoint
                  */
-                public function __construct($uri, $endpoint) {
+                public function __construct(string $uri, Endpoint $endpoint) {
                     $this->endpoint = $endpoint;
                     $this->uri      = $uri;
                 }
@@ -308,6 +294,9 @@ class Dispatcher implements EventDriven {
         );
     }
 
+    /**
+     * @return \microapi\base\endpoint\Endpoint|null
+     */
     private function getEndpoint() {
         // module or controller name
         $part = $this->getNextUriComponent();
@@ -365,5 +354,46 @@ class Dispatcher implements EventDriven {
         return null;
     }
 
+    private function objFromRaw(string $raw): array {
+        return json_decode($raw, true);
+    }
 
+    /**
+     * @param \microapi\base\endpoint\Endpoint $endpoint
+     * @return array
+     */
+    public function extractEndpointParams(Endpoint $endpoint): array {
+        // prepare arguments and DTO
+        $paramsMeta = $endpoint->getParamsMeta();
+        $params     = [];
+        foreach ($paramsMeta as $paramName => $meta) {
+            if ($meta['builtin']) {
+                $val = $this->getNextUriComponent();
+                if (($val === null) && !$meta['optional']) {
+                    if ($meta['defaultIsConstant']) {
+                        // todo: проверить
+                        $params[$paramName] = $meta['default'];
+                    }
+                    else {
+                        $params[$paramName] = $meta['default'];
+                    }
+                }
+                else {
+                    $params[$paramName] = self::castType($val, $meta['type']);
+                }
+            }
+            else {
+                $dto = new $meta['type']($this->objFromRaw($this->getRaw()));
+                if ($dto instanceof DTO) {
+                    if ($dto->validate()) {
+                        $params[$paramName] = $dto;
+                    }
+                    break;
+                }
+                throw new HttpException('Only DTO objects allowed', 400);
+            }
+        }
+
+        return $params;
+    }
 }
