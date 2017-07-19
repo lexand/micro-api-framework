@@ -6,9 +6,9 @@
  * Time: 18:27
  */
 
-namespace microapi\base\events;
+namespace microapi\events;
 
-trait Events{
+trait Events {
 
     /**
      * @var callable[][]
@@ -28,7 +28,7 @@ trait Events{
         $event = strtolower($event);
 
         if ($ef === null) {
-            $ef = new EventObject($event);
+            $ef = new EventObject();
         }
 
         if (isset($this->_e[$event])) {

@@ -10,10 +10,6 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
-use microapi\base\endpoint\EndpointActionNotFoundException;
-use microapi\base\endpoint\EndpointControllerNotFoundException;
-use microapi\base\endpoint\Endpoint;
-
 class Reflection {
     /**
      * @var string
@@ -53,7 +49,7 @@ class Reflection {
             $methodName = 'action' . $this->action;
             $found      = false;
             /** @var \ReflectionMethod $mr */
-            foreach ($ctlRefl->getMethods() as $mr) {
+            foreach ($ctlRefl->getMethods(\ReflectionMethod::IS_PUBLIC) as $mr) {
                 if ($methodName === strtolower($mr->getName())) {
                     $found = true;
                     break;
@@ -63,12 +59,12 @@ class Reflection {
             if ($found) {
                 $methodName = $mr->getName();
 
-                if (static::isMethodAllowed($this->method, $mr->getDocComment())) {
+                if (static::isHttpMethodAllowed($this->method, $mr->getDocComment())) {
                     return new Endpoint(
                         $this->method,
                         $ctl,
                         $methodName,
-                        static::getParamsData($mr)
+                        static::getParamsMeta($mr, true)
                     );
                 }
             }
@@ -78,16 +74,22 @@ class Reflection {
         throw new EndpointControllerNotFoundException("'{$this->fqcnCtl}' not found");
     }
 
-    public static function isMethodAllowed(string $method, string $comment): bool {
+    public static function isHttpMethodAllowed(string $method, string $comment): bool {
         // todo: this
         return true;
     }
 
+    public static function getActionHttpMethods(\ReflectionMethod $mr): array {
+        // todo: this
+        return [];
+    }
+
     /**
      * @param \ReflectionMethod $mr
+     * @param bool              $getConstVal get constant value instead of constant name
      * @return array
      */
-    public static function getParamsData(\ReflectionMethod $mr): array {
+    public static function getParamsMeta(\ReflectionMethod $mr, bool $getConstVal = false): array {
         $params = [];
         /** @var \ReflectionParameter $pr */
         foreach ($mr->getParameters() as $pr) {
@@ -97,12 +99,14 @@ class Reflection {
 
             $argData['optional'] = $pr->isOptional();
             if ($type->isBuiltin()) {
-                $argData['type']     = (string)$type;
+                $argData['type']    = (string)$type;
                 $argData['builtin'] = true;
                 if ($argData['optional']) {
                     if ($pr->isDefaultValueConstant()) {
-                        $argData['defaultIsConstant'] = true;
-                        $argData['default']           = $pr->getDefaultValueConstantName();
+                        $argData['defaultIsConstant'] = !$getConstVal;
+                        $argData['default']           = $getConstVal
+                            ? $pr->getDefaultValue()
+                            : $pr->getDefaultValueConstantName();
                     }
                     else {
                         $argData['defaultIsConstant'] = false;
@@ -110,9 +114,9 @@ class Reflection {
                     }
                 }
             }
-            else{
+            else {
                 $argData['builtin'] = false;
-                $argData['type'] = $pr->getClass()->getName();
+                $argData['type']    = $pr->getClass()->getName();
                 if ($argData['optional']) {
                     $argData['default'] = null;
                 }

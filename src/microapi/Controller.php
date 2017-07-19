@@ -8,11 +8,13 @@
 
 declare(strict_types=1);
 
-namespace microapi\base;
+namespace microapi;
 
-use microapi\base\events\EventDriven;
-use microapi\base\events\EventObject;
-use microapi\base\events\Events;
+use microapi\dto\DTO;
+use microapi\dto\Validator;
+use microapi\events\EventDriven;
+use microapi\events\EventObject;
+use microapi\events\Events;
 use microapi\http\HttpException;
 
 class Controller implements EventDriven {

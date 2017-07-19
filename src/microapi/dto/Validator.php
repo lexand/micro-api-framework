@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace microapi\base;
+namespace microapi\dto;
 
 abstract class Validator {
 

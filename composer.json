@@ -4,37 +4,28 @@
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
-    {
-      "name": "Olexandr Dorogikh",
-      "email": "dorogikh.alexander@gmail.com"
-    }
-  ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/lexand/php-reflection-invoker.git"
-    }
+	{
+	  "name": "Olexandr Dorogyh",
+	  "email": "dorogikh.alexander@gmail.com"
+	}
   ],
   "autoload": {
-    "psr-4": {
-      "app\\": [
-        "tests/functional/app/"
-      ],
-      "microapi\\": "microapi/",
-      "tests\\utils\\": "tests/utils"
-    }
+	"psr-4": {
+	  "app\\": [
+		"tests/functional/app/"
+	  ],
+	  "microapi\\": "src/microapi/",
+	  "tests\\utils\\": "tests/utils"
+	}
   },
   "require": {
-    "monolog/monolog": "1.21.0"
+	"php": ">=7.0",
+	"psr/log": "~1.0"
   },
   "require-dev": {
-    "guzzlehttp/guzzle": "~6.0",
-    "phpunit/phpunit": "5.5.*",
-    "reflection/invoker": "dev-master"
+	"phpunit/phpunit": "6.*"
   },
   "scripts": {
-    "test": "phpunit",
-    "post-install-cmd": "find vendor -name '.git' -type d | xargs rm -Rf",
-    "post-update-cmd": "find vendor -name '.git' -type d | xargs rm -Rf"
+	"test": "phpunit"
   }
 }

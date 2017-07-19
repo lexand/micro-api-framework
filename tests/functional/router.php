@@ -6,11 +6,11 @@
  * Time: 13:42
  */
 
-require_once __DIR__ . '/../../config/main-config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 $uri = $_SERVER['REQUEST_URI'];
 
-if($uri === '/ping'){
+if ($uri === '/ping') {
     echo 'pong';
     exit(0);
 }
@@ -19,6 +19,7 @@ if($uri === '/ping'){
 if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
     return false;
 }
-else {
-    require_once APP_ROOT . '/www/api.php';
-}
+
+\microapi\Dispatcher::get()
+                    ->addDefaultModule('\app\controller')
+                    ->dispatch();

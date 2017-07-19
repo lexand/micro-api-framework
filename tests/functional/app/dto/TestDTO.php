@@ -8,7 +8,7 @@
 
 namespace app\dto;
 
-use microapi\base\DTO;
+use microapi\dto\DTO;
 
 class TestDTO extends DTO{
 

@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace microapi\base\endpoint;
+namespace microapi\endpoint;
 
 class EndpointActionNotFoundException extends EndpointException {
 

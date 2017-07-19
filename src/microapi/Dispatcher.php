@@ -10,13 +10,13 @@ declare(strict_types=1);
 
 namespace microapi;
 
-use microapi\base\DTO;
-use microapi\base\endpoint\Endpoint;
-use microapi\base\endpoint\EndpointCallRejectedException;
-use microapi\base\endpoint\EndpointException;
-use microapi\base\events\EventDriven;
-use microapi\base\events\EventObject;
-use microapi\base\events\Events;
+use microapi\dto\DTO;
+use microapi\endpoint\Endpoint;
+use microapi\endpoint\EndpointCallRejectedException;
+use microapi\endpoint\EndpointException;
+use microapi\events\EventDriven;
+use microapi\events\EventObject;
+use microapi\events\Events;
 use microapi\endpoint\Reflection;
 use microapi\http\HttpException;
 use Psr\Log\LoggerInterface;
@@ -74,7 +74,7 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * all controllers should extends \microapi\base\Controller
+     * all controllers should extends \microapiController
      *
      * @param string $module
      * @param string $ns
@@ -87,7 +87,7 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * all controllers should extends \microapi\base\Controller
+     * all controllers should extends \microapiController
      *
      * @param string $ns
      * @return $this
@@ -259,7 +259,7 @@ class Dispatcher implements EventDriven {
                  */
                 public $uri;
                 /**
-                 * @var base\endpoint\Endpoint
+                 * @var \microapi\endpoint\Endpoint
                  */
                 public $endpoint;
 
@@ -295,7 +295,7 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * @return \microapi\base\endpoint\Endpoint|null
+     * @return \microapi\endpoint\Endpoint|null
      */
     private function getEndpoint() {
         // module or controller name
@@ -359,7 +359,7 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * @param \microapi\base\endpoint\Endpoint $endpoint
+     * @param \microapi\endpoint\Endpoint $endpoint
      * @return array
      */
     public function extractEndpointParams(Endpoint $endpoint): array {

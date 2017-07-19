@@ -8,11 +8,11 @@
 
 declare(strict_types=1);
 
-namespace microapi\base\endpoint;
+namespace microapi\endpoint;
 
 class Endpoint {
     /**
-     * @var \microapi\base\Controller
+     * @var \microapi\Controller
      */
     private $controller;
 
@@ -36,13 +36,13 @@ class Endpoint {
     /**
      * Endpoint constructor.
      *
-     * @param string                    $httpMethod HTTP method
-     * @param \microapi\base\Controller $controller
-     * @param string                    $actionMethod
-     * @param array                     $paramsMeta
+     * @param string               $httpMethod HTTP method
+     * @param \microapi\Controller $controller
+     * @param string               $actionMethod
+     * @param array                $paramsMeta
      */
     public function __construct(string $httpMethod,
-                                \microapi\base\Controller $controller,
+                                \microapi\Controller $controller,
                                 string $actionMethod,
                                 array $paramsMeta) {
         $this->controller   = $controller;
@@ -52,16 +52,16 @@ class Endpoint {
     }
 
     /**
-     * @return \microapi\base\Controller
+     * @return \microapi\Controller
      */
-    public function getController(): \microapi\base\Controller { return $this->controller; }
+    public function getController(): \microapi\Controller { return $this->controller; }
 
     /**
      * @return string
      */
     public function getActionMethod(): string { return $this->actionMethod; }
 
-    public function getActionName(): string { return strtolower(substr($this->actionMethod,6)); }
+    public function getActionName(): string { return strtolower(substr($this->actionMethod, 6)); }
 
     /**
      * @return array
@@ -80,7 +80,7 @@ class Endpoint {
 
     public function invoke(array $params = []) {
 
-        if($this->controller->beforeAction($this->getActionName(), $params)) {
+        if ($this->controller->beforeAction($this->getActionName(), $params)) {
             if ($params === []) {
                 return call_user_func([$this->controller, $this->actionMethod]);
             }

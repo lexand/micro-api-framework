@@ -6,7 +6,7 @@
  * Time: 18:28
  */
 
-namespace microapi\base\events;
+namespace microapi\events;
 
 interface EventDriven {
     public function on(string $event, callable $f) : EventDriven;
