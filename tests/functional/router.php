@@ -26,7 +26,7 @@ $d->on(
     'afterdispatch',
     [
         function (\microapi\event\Event $e): \microapi\event\Event {
-            /** @var \microapi\event\AfterDispatch $e */
+            /** @var \microapi\event\object\AfterDispatch $e */
             if ($e->data instanceof Throwable) {
                 $e->setStopped();
                 header('Content-Type: application/json');
@@ -41,7 +41,7 @@ $d->on(
             return $e;
         },
         function (\microapi\event\Event $e): \microapi\event\Event {
-            /** @var \microapi\event\AfterDispatch $e */
+            /** @var \microapi\event\object\AfterDispatch $e */
             header('Content-Type: application/json');
             echo json_encode($e->data);
 

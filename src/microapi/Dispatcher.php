@@ -279,7 +279,7 @@ class Dispatcher implements EventDriven {
     }
 
     private function afterDispatch($data) {
-        $this->trigger('afterdispath', new AfterDispatch($data));
+        $this->trigger('afterdispatch', new AfterDispatch($data));
     }
 
     /**

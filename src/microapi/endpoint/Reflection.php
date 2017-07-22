@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
+use microapi\endpoint\exceptions\EndpointActionNotFoundException;
+use microapi\endpoint\exceptions\EndpointControllerNotFoundException;
+
 class Reflection {
     /**
      * @var string
@@ -51,17 +54,15 @@ class Reflection {
                 }
             }
 
-            if ($found) {
-                if (static::isHttpMethodAllowed($this->method, $mr)) {
-                    return new Endpoint(
-                        $this->method,
-                        $ctl,
-                        [
-                            'methodName' => $mr->getName(),
-                            'paramsMeta' => static::getParamsMeta($mr, true)
-                        ]
-                    );
-                }
+            if ($found && static::isHttpMethodAllowed($this->method, $mr)) {
+                return new Endpoint(
+                    $this->method,
+                    $ctl,
+                    [
+                        'methodName' => $mr->getName(),
+                        'paramsMeta' => static::getParamsMeta($mr, true)
+                    ]
+                );
             }
 
             throw new EndpointActionNotFoundException("'{$this->action}' not found in '{$this->fqcnCtl}'");

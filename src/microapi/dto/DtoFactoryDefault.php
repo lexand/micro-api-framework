@@ -13,6 +13,6 @@ namespace microapi\dto;
 class DtoFactoryDefault implements DtoFactory {
 
     public function create(string $class, string $rawData): DTO {
-        return new $class(json_decode($rawData));
+        return new $class(json_decode($rawData, true));
     }
 }

@@ -9,6 +9,7 @@
 namespace microapi;
 
 use app\controller\Test6547586Ctl;
+use microapi\event\Event;
 use PHPUnit\Framework\TestCase;
 
 class DispatcherTest extends TestCase {
@@ -55,4 +56,27 @@ class DispatcherTest extends TestCase {
         static::assertEquals((new Test6547586Ctl())->actionGet(), $res);
     }
 
+    public function testDispatch() {
+        $_SERVER['REQUEST_URI'] = '/test6547586/get';
+        $_SERVER['REQUEST_METHOD'] = 'get';
+
+        $data = [];
+
+        $d = new Dispatcher();
+        $d->addDefaultModule('\app');
+        $d->on(
+            'afterdispatch',
+            [
+                function(Event $e) use (&$data){
+                    /** @var \microapi\event\object\AfterDispatch $e */
+                    $data = $e->data;
+                    
+                    return $e;
+                }
+            ]
+        );
+        $d->dispatch();
+
+        static::assertEquals((new Test6547586Ctl())->actionGet(), $data);
+    }
 }
