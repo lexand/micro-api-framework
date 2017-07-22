@@ -1,4 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
 
-get.php
-post.php
+endpoints_get.php
+endpoints_post.php

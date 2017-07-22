@@ -32,11 +32,11 @@ class CacheBuilderTest extends TestCase {
 
         $cb->build();
 
-        self::assertTrue(file_exists(__DIR__ . '/get.php'));
-        self::assertTrue(file_exists(__DIR__ . '/post.php'));
+        self::assertTrue(file_exists(__DIR__ . '/endpoints_get.php'));
+        self::assertTrue(file_exists(__DIR__ . '/endpoints_post.php'));
 
 
-        self::assertEquals(require TESTS_ROOT . '/data/endpoints_get.php', require 'get.php');
-        self::assertEquals(require TESTS_ROOT . '/data/endpoints_post.php', require 'post.php');
+        self::assertEquals(require TESTS_ROOT . '/data/endpoints_get.php', require 'endpoints_get.php');
+        self::assertEquals(require TESTS_ROOT . '/data/endpoints_post.php', require 'endpoints_post.php');
     }
 }
