@@ -15,12 +15,6 @@ class Endpoint {
      * @var \microapi\Controller
      */
     private $controller;
-
-    /**
-     * @var string
-     */
-    private $actionMethod;
-
     /**
      * @var string
      */
@@ -31,23 +25,20 @@ class Endpoint {
      */
     private $uri;
 
-    private $paramsMeta = [];
+    private $actionMeta = [];
 
     /**
      * Endpoint constructor.
      *
      * @param string               $httpMethod HTTP method
      * @param \microapi\Controller $controller
-     * @param string               $actionMethod
-     * @param array                $paramsMeta
+     * @param array                $actionMeta
      */
     public function __construct(string $httpMethod,
                                 \microapi\Controller $controller,
-                                string $actionMethod,
-                                array $paramsMeta) {
+                                array $actionMeta) {
         $this->controller   = $controller;
-        $this->actionMethod = $actionMethod;
-        $this->paramsMeta   = $paramsMeta;
+        $this->actionMeta   = $actionMeta;
         $this->httpMethod   = $httpMethod;
     }
 
@@ -59,14 +50,14 @@ class Endpoint {
     /**
      * @return string
      */
-    public function getActionMethod(): string { return $this->actionMethod; }
+    public function getActionMethod(): string { return $this->actionMeta['methodName']; }
 
-    public function getActionName(): string { return strtolower(substr($this->actionMethod, 6)); }
+    public function getActionName(): string { return strtolower(substr($this->actionMeta['methodName'], 6)); }
 
     /**
      * @return array
      */
-    public function getParamsMeta(): array { return $this->paramsMeta; }
+    public function getParamsMeta(): array { return $this->actionMeta['paramsMeta']; }
 
     /**
      * @return string
@@ -82,12 +73,14 @@ class Endpoint {
 
         if ($this->controller->beforeAction($this->getActionName(), $params)) {
             if ($params === []) {
-                return call_user_func([$this->controller, $this->actionMethod]);
+                $res = call_user_func([$this->controller, $this->actionMeta['methodName']]);
+            }
+            else {
+                $res = call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
             }
 
-            return call_user_func_array([$this->controller, $this->actionMethod], $params);
+            return $this->controller->afterAction($this->getActionName(), $res);
         }
-
         throw new EndpointCallRejectedException();
     }
 }

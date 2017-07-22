@@ -14,10 +14,10 @@ use microapi\dto\DTO;
 use microapi\endpoint\Endpoint;
 use microapi\endpoint\EndpointCallRejectedException;
 use microapi\endpoint\EndpointException;
+use microapi\endpoint\Reflection;
 use microapi\events\EventDriven;
 use microapi\events\EventObject;
 use microapi\events\Events;
-use microapi\endpoint\Reflection;
 use microapi\http\HttpException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -25,11 +25,6 @@ use Psr\Log\NullLogger;
 class Dispatcher implements EventDriven {
 
     use Events;
-
-    const METHOD_POST   = 'post';
-    const METHOD_PUT    = 'put';
-    const METHOD_GET    = 'get';
-    const METHOD_DELETE = 'delete';
 
     /**
      * @var string
@@ -165,7 +160,7 @@ class Dispatcher implements EventDriven {
         try {
             $this->afterDispatch($endpoint->invoke($params));
         }
-        catch (EndpointCallRejectedException $e){
+        catch (EndpointCallRejectedException $e) {
             throw new HttpException('request denied', HttpException::FORBIDDEN);
         }
     }
@@ -248,7 +243,7 @@ class Dispatcher implements EventDriven {
         return $this;
     }
 
-    private function beforeDispatch(Endpoint $endpoint): true {
+    private function beforeDispatch(Endpoint $endpoint): bool {
         $uri = $this->uri;
 
         return $this->trigger(
@@ -318,7 +313,14 @@ class Dispatcher implements EventDriven {
         return $endpoint;
     }
 
-    private function getEndpointFromCache(string $method, string $fqcnCtl, string $action) {
+    /**
+     * @param string $method
+     * @param string $fqcnCtl
+     * @param string $action
+     * @return \microapi\endpoint\Endpoint
+     * @internal 
+     */
+    public function getEndpointFromCache(string $method, string $fqcnCtl, string $action): Endpoint {
         if (empty($this->endPointCache[$method])) {
             $this->loadEndpointCache($method);
         }
@@ -327,7 +329,11 @@ class Dispatcher implements EventDriven {
         if (isset($controllers[$fqcnCtl])) {
             $actions = $controllers[$fqcnCtl];
             if (class_exists($fqcnCtl) && isset($actions[$action])) {
-                return $actions[$action];
+                return new Endpoint(
+                    $method,
+                    new $fqcnCtl(),
+                    $actions[$action]
+                );
             }
         }
 
@@ -341,7 +347,14 @@ class Dispatcher implements EventDriven {
         }
     }
 
-    private function getEndpointFromReflection(string $method, string $fqcnCtl, string $action) {
+    /**
+     * @param string $method
+     * @param string $fqcnCtl
+     * @param string $action
+     * @return \microapi\endpoint\Endpoint|null
+     * @internal 
+     */
+    public function getEndpointFromReflection(string $method, string $fqcnCtl, string $action) {
         if ($this->reflationAllowed) {
             try {
                 return (new Reflection($method, $fqcnCtl, $action))->getEndpoint();
@@ -370,13 +383,7 @@ class Dispatcher implements EventDriven {
             if ($meta['builtin']) {
                 $val = $this->getNextUriComponent();
                 if (($val === null) && !$meta['optional']) {
-                    if ($meta['defaultIsConstant']) {
-                        // todo: проверить
-                        $params[$paramName] = $meta['default'];
-                    }
-                    else {
-                        $params[$paramName] = $meta['default'];
-                    }
+                    $params[$paramName] = $meta['default'];
                 }
                 else {
                     $params[$paramName] = self::castType($val, $meta['type']);

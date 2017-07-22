@@ -14,7 +14,10 @@
       "app\\": [
         "tests/functional/app/"
       ],
-      "microapi\\": "src/microapi/",
+      "microapi\\": [
+        "src/microapi/",
+        "tests/units/microapi/"
+      ],
       "tests\\utils\\": "tests/utils"
     }
   },
@@ -24,7 +27,8 @@
   },
   "require-dev": {
     "guzzlehttp/guzzle": "6.*",
-    "codeception/codeception": "2.*"
+    "codeception/codeception": "2.*",
+    "phpunit/phpunit": "6.*"
   },
   "scripts": {
     "test": "phpunit"

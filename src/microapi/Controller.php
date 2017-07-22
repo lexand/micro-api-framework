@@ -64,4 +64,38 @@ class Controller implements EventDriven {
             throw new HttpException('Validation failed');
         }
     }
+
+    public function afterAction(string $action, $res) {
+        $responseEvent = new class($this, $action, $res) extends EventObject {
+            /**
+             * @var string
+             */
+            public $action;
+            /**
+             * @var Controller
+             */
+            public $controller;
+            /**
+             * @var array
+             */
+            public $response;
+
+            /**
+             *  constructor.
+             *
+             * @param Controller $controller
+             * @param string     $action
+             * @param            $response
+             */
+            public function __construct(Controller $controller, string $action, $response) {
+                $this->action     = $action;
+                $this->controller = $controller;
+                $this->response   = $response;
+            }
+        };
+
+        $this->trigger('afteraction', $responseEvent);
+
+        return $responseEvent->response;
+    }
 }

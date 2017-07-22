@@ -11,9 +11,7 @@ declare(strict_types=1);
 namespace microapi\events;
 
 class EventObject {
-    private $_success = false;
-
-    private $eventName;
+    private $_success = true;
 
     public function setFailed() { $this->_success = false; }
 

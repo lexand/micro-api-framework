@@ -38,33 +38,28 @@ class Reflection {
         $this->action  = strtolower($action);
     }
 
-    public function create(array $paramsData): Endpoint {
-        // todo : this
-    }
-
     public function getEndpoint(): Endpoint {
         if (class_exists($this->fqcnCtl)) {
-            $ctl        = new $this->fqcnCtl();
-            $ctlRefl    = new \ReflectionObject($ctl);
-            $methodName = 'action' . $this->action;
-            $found      = false;
+            $ctl     = new $this->fqcnCtl();
+            $ctlRefl = new \ReflectionObject($ctl);
+            $found   = false;
             /** @var \ReflectionMethod $mr */
             foreach ($ctlRefl->getMethods(\ReflectionMethod::IS_PUBLIC) as $mr) {
-                if ($methodName === strtolower($mr->getName())) {
+                if ($this->action === strtolower(substr($mr->getName(), 6))) {
                     $found = true;
                     break;
                 }
             }
 
             if ($found) {
-                $methodName = $mr->getName();
-
-                if (static::isHttpMethodAllowed($this->method, $mr->getDocComment())) {
+                if (static::isHttpMethodAllowed($this->method, $mr)) {
                     return new Endpoint(
                         $this->method,
                         $ctl,
-                        $methodName,
-                        static::getParamsMeta($mr, true)
+                        [
+                            'methodName' => $mr->getName(),
+                            'paramsMeta' => static::getParamsMeta($mr, true)
+                        ]
                     );
                 }
             }
@@ -74,13 +69,22 @@ class Reflection {
         throw new EndpointControllerNotFoundException("'{$this->fqcnCtl}' not found");
     }
 
-    public static function isHttpMethodAllowed(string $method, string $comment): bool {
-        // todo: this
-        return true;
+    public static function isHttpMethodAllowed(string $method, \ReflectionMethod $mr): bool {
+        return in_array($method, static::getActionHttpMethods($mr), true);
     }
 
     public static function getActionHttpMethods(\ReflectionMethod $mr): array {
-        // todo: this
+        $doc = $mr->getDocComment();
+
+        if ($doc !== false) {
+            $matches = [];
+            preg_match('/@methods\s*\((.+?)\)/m', $doc, $matches);
+
+            if (count($matches) === 2) {
+                return array_map('trim', explode(',', $matches[1]));
+            }
+        }
+
         return [];
     }
 
