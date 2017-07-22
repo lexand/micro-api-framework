@@ -12,13 +12,13 @@ class TestServer {
     const PORT = '9898';
 
     public static function start() {
-        $cmd = TESTS_ROOT . '/functional/start_test_server.sh ' . APP_ROOT . '/www' . ' ' . TestServer::PORT;
+        $cmd = TESTS_ROOT . '/functional/start_test_server.sh ' . TESTS_ROOT . '/data' . ' ' . TestServer::PORT;
         shell_exec($cmd);
         TestServer::wait();
     }
 
     public static function stop() {
-        shell_exec(TESTS_ROOT . '/functional/stop_test_server.sh ' . APP_ROOT . '/www');
+        shell_exec(TESTS_ROOT . '/functional/stop_test_server.sh ' . TESTS_ROOT . '/data');
     }
 
     public static function wait() {

@@ -10,14 +10,18 @@ declare(strict_types=1);
 
 namespace microapi;
 
-use microapi\dto\DTO;
+use microapi\dto\DtoFactory;
+use microapi\dto\DtoFactoryDefault;
 use microapi\endpoint\Endpoint;
-use microapi\endpoint\EndpointCallRejectedException;
-use microapi\endpoint\EndpointException;
+use microapi\endpoint\exceptions\EndpointActionNotFoundException;
+use microapi\endpoint\exceptions\EndpointControllerNotFoundException;
+use microapi\endpoint\exceptions\EndpointException;
+use microapi\endpoint\exceptions\EndpointInvokeRejectedException;
 use microapi\endpoint\Reflection;
-use microapi\events\EventDriven;
-use microapi\events\EventObject;
-use microapi\events\Events;
+use microapi\event\EventDriven;
+use microapi\event\object\AfterDispatch;
+use microapi\event\object\BeforeDispatch;
+use microapi\event\Events;
 use microapi\http\HttpException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -39,7 +43,7 @@ class Dispatcher implements EventDriven {
      */
     private $uriComponents;
     /**
-     * @var \microapi\Dispatcher
+     * @var Dispatcher
      */
     private static $instance;
 
@@ -56,9 +60,15 @@ class Dispatcher implements EventDriven {
     private $skipPathComponents = 0;
 
     private $reflationAllowed = true;
+    /**
+     * @var DtoFactory
+     */
+    private $dtoFactory;
 
     /**
      * App constructor.
+     *
+     * @throws \LogicException
      */
     public function __construct() {
         if (static::$instance !== null) {
@@ -69,10 +79,11 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * all controllers should extends \microapiController
+     * - all controllers in module should extends \microapi\Controller
+     * - all controllers should placed under \&lt;module_namespace&gt;\controller namespace
      *
-     * @param string $module
-     * @param string $ns
+     * @param string $module module name
+     * @param string $ns     module namespace.
      * @return $this
      */
     public function addModule(string $module, string $ns) {
@@ -82,7 +93,8 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * all controllers should extends \microapiController
+     * - all controllers in module should extends \microapi\Controller
+     * - all controllers should placed under \&lt;module_namespace&gt;\controller namespace
      *
      * @param string $ns
      * @return $this
@@ -93,15 +105,21 @@ class Dispatcher implements EventDriven {
         return $this;
     }
 
-    public function setEndpointCachePath(string $cachePath) {
+    /**
+     * @param string $cachePath
+     * @return Dispatcher
+     */
+    public function setEndpointCachePath(string $cachePath): Dispatcher {
         $this->endpointCachePath = $cachePath;
+
+        return $this;
     }
 
     /**
      * @param bool $reflationAllowed
-     * @return \microapi\Dispatcher
+     * @return Dispatcher
      */
-    public function setReflationAllowed(bool $reflationAllowed): \microapi\Dispatcher {
+    public function setReflationAllowed(bool $reflationAllowed): Dispatcher {
         $this->reflationAllowed = $reflationAllowed;
 
         return $this;
@@ -142,26 +160,36 @@ class Dispatcher implements EventDriven {
         );
     }
 
+    /**
+     * Perform real request
+     *
+     * @throws HttpException
+     */
     public function dispatch() {
         $this->preDispatch();
 
-        $endpoint = $this->getEndpoint();
-
-        if (!$this->beforeDispatch($endpoint)) {
-            throw new \microapi\http\HttpException('request rejected', 500);
-        }
-
-        if ($endpoint === null) {
-            throw new \microapi\http\HttpException($_SERVER['REQUEST_URI'], 404);
-        }
-
-        $params = $this->extractEndpointParams($endpoint);
-
         try {
-            $this->afterDispatch($endpoint->invoke($params));
+            $endpoint = $this->getEndpoint();
+
+            if (!$this->beforeDispatch($endpoint)) {
+                throw new HttpException('request rejected', HttpException::SERVER_ERROR);
+            }
+
+            if ($endpoint === null) {
+                throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
+            }
+
+            $params = $this->extractEndpointParams($endpoint);
+
+            try {
+                $this->afterDispatch($endpoint->invoke($params));
+            }
+            catch (EndpointInvokeRejectedException $e) {
+                throw new HttpException('request denied', HttpException::FORBIDDEN);
+            }
         }
-        catch (EndpointCallRejectedException $e) {
-            throw new HttpException('request denied', HttpException::FORBIDDEN);
+        catch (\Throwable $t) {
+            $this->afterDispatch($t);
         }
     }
 
@@ -217,13 +245,16 @@ class Dispatcher implements EventDriven {
         return $this->logger;
     }
 
-    public function setLog(LoggerInterface $li): \microapi\Dispatcher {
+    public function setLog(LoggerInterface $li): Dispatcher {
         $this->logger = $li;
 
         return $this;
     }
 
-    protected function preDispatch() {
+    /**
+     * @internal
+     */
+    public function preDispatch() {
         $this->uri    = $_SERVER['REQUEST_URI'];
         $this->method = strtolower($_SERVER['REQUEST_METHOD']);
 
@@ -235,72 +266,38 @@ class Dispatcher implements EventDriven {
 
     /**
      * @param int $skipPathComponents
-     * @return \microapi\Dispatcher
+     * @return Dispatcher
      */
-    public function setSkipPathComponents(int $skipPathComponents): \microapi\Dispatcher {
+    public function setSkipPathComponents(int $skipPathComponents): Dispatcher {
         $this->skipPathComponents = $skipPathComponents;
 
         return $this;
     }
 
     private function beforeDispatch(Endpoint $endpoint): bool {
-        $uri = $this->uri;
-
-        return $this->trigger(
-            'beforedispatch',
-            new class($uri, $endpoint) extends EventObject {
-                /**
-                 * @var string
-                 */
-                public $uri;
-                /**
-                 * @var \microapi\endpoint\Endpoint
-                 */
-                public $endpoint;
-
-                /**
-                 *  constructor.
-                 *
-                 * @param $endpoint
-                 */
-                public function __construct(string $uri, Endpoint $endpoint) {
-                    $this->endpoint = $endpoint;
-                    $this->uri      = $uri;
-                }
-
-            }
-        )
-                    ->isSuccess();
+        return !$this->trigger('beforedispatch', new BeforeDispatch($this->uri, $endpoint))->isStopped();
     }
 
-    private function afterDispatch(array $data) {
-        $this->trigger(
-            'afterdispath',
-            new class ($data) extends EventObject {
-                public $data = [];
-
-                /**
-                 *  constructor.
-                 *
-                 * @param array $data
-                 */
-                public function __construct(array $data) { $this->data = $data; }
-            }
-        );
+    private function afterDispatch($data) {
+        $this->trigger('afterdispath', new AfterDispatch($data));
     }
 
     /**
      * @return \microapi\endpoint\Endpoint|null
+     * @throws \microapi\http\HttpException
+     * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
+     * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
+     * @internal
      */
-    private function getEndpoint() {
+    public function getEndpoint() {
         // module or controller name
         $part = $this->getNextUriComponent();
         if (isset($this->modulesNamespaces[$part])) {
             $ctlName = $this->getNextUriComponent();
-            $fqcnCtl = $this->modulesNamespaces[$part] . '/' . ucfirst($ctlName) . 'Ctl';
+            $fqcnCtl = $this->modulesNamespaces[$part] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
         }
         else {
-            $fqcnCtl = $this->modulesNamespaces['__default'] . '/' . ucfirst($part) . 'Ctl';
+            $fqcnCtl = $this->modulesNamespaces['__default'] . '\controller\\' . ucfirst($part) . 'Ctl';
         }
 
         $actionName = $this->getNextUriComponent();
@@ -317,24 +314,30 @@ class Dispatcher implements EventDriven {
      * @param string $method
      * @param string $fqcnCtl
      * @param string $action
-     * @return \microapi\endpoint\Endpoint
-     * @internal 
+     * @return \microapi\endpoint\Endpoint|null
+     * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
+     * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
+     * @internal
      */
-    public function getEndpointFromCache(string $method, string $fqcnCtl, string $action): Endpoint {
+    public function getEndpointFromCache(string $method, string $fqcnCtl, string $action) {
         if (empty($this->endPointCache[$method])) {
             $this->loadEndpointCache($method);
         }
 
-        $controllers = $this->endPointCache[$method];
-        if (isset($controllers[$fqcnCtl])) {
-            $actions = $controllers[$fqcnCtl];
-            if (class_exists($fqcnCtl) && isset($actions[$action])) {
-                return new Endpoint(
-                    $method,
-                    new $fqcnCtl(),
-                    $actions[$action]
-                );
+        if (isset($this->endPointCache[$method])) {
+            $controllers = $this->endPointCache[$method];
+            if (isset($controllers[$fqcnCtl]) && class_exists($fqcnCtl)) {
+                $actions = $controllers[$fqcnCtl];
+                if (isset($actions[$action])) {
+                    return new Endpoint(
+                        $method,
+                        new $fqcnCtl(),
+                        $actions[$action]
+                    );
+                }
+                throw new EndpointActionNotFoundException("'{$action}' not found in '{$fqcnCtl}'");
             }
+            throw new EndpointControllerNotFoundException("'{$fqcnCtl}' not found");
         }
 
         return null;
@@ -352,7 +355,8 @@ class Dispatcher implements EventDriven {
      * @param string $fqcnCtl
      * @param string $action
      * @return \microapi\endpoint\Endpoint|null
-     * @internal 
+     * @throws \microapi\http\HttpException
+     * @internal
      */
     public function getEndpointFromReflection(string $method, string $fqcnCtl, string $action) {
         if ($this->reflationAllowed) {
@@ -367,13 +371,10 @@ class Dispatcher implements EventDriven {
         return null;
     }
 
-    private function objFromRaw(string $raw): array {
-        return json_decode($raw, true);
-    }
-
     /**
      * @param \microapi\endpoint\Endpoint $endpoint
      * @return array
+     * @throws \microapi\http\HttpException
      */
     public function extractEndpointParams(Endpoint $endpoint): array {
         // prepare arguments and DTO
@@ -390,17 +391,30 @@ class Dispatcher implements EventDriven {
                 }
             }
             else {
-                $dto = new $meta['type']($this->objFromRaw($this->getRaw()));
-                if ($dto instanceof DTO) {
-                    if ($dto->validate()) {
-                        $params[$paramName] = $dto;
-                    }
-                    break;
-                }
-                throw new HttpException('Only DTO objects allowed', 400);
+                $params[$paramName] = $this->dtoFactory()->create($meta['type'], $this->getRaw());
             }
         }
 
         return $params;
     }
+
+    private function dtoFactory(): DtoFactory {
+        if ($this->dtoFactory === null) {
+            $this->dtoFactory = new DtoFactoryDefault();
+        }
+
+        return $this->dtoFactory;
+    }
+
+    /**
+     * @param \microapi\dto\DtoFactory $dtoFactory
+     * @return Dispatcher
+     */
+    public function setDtoFactory(\microapi\dto\DtoFactory $dtoFactory): Dispatcher {
+        $this->dtoFactory = $dtoFactory;
+
+        return $this;
+    }
+
+
 }

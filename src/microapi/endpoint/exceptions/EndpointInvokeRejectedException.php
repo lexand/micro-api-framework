@@ -8,8 +8,8 @@
 
 declare(strict_types=1);
 
-namespace microapi\endpoint;
+namespace microapi\endpoint\exceptions;
 
-class EndpointCallRejectedException extends \microapi\endpoint\EndpointException {
+class EndpointInvokeRejectedException extends EndpointException {
 
 }

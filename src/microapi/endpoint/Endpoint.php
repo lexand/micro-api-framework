@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
+use microapi\Controller;
+
 class Endpoint {
     /**
      * @var \microapi\Controller
@@ -37,6 +39,7 @@ class Endpoint {
     public function __construct(string $httpMethod,
                                 \microapi\Controller $controller,
                                 array $actionMeta) {
+
         $this->controller   = $controller;
         $this->actionMeta   = $actionMeta;
         $this->httpMethod   = $httpMethod;
@@ -81,6 +84,6 @@ class Endpoint {
 
             return $this->controller->afterAction($this->getActionName(), $res);
         }
-        throw new EndpointCallRejectedException();
+        throw new EndpointInvokeRejectedException();
     }
 }

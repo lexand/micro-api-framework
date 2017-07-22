@@ -12,9 +12,10 @@ namespace microapi;
 
 use microapi\dto\DTO;
 use microapi\dto\Validator;
-use microapi\events\EventDriven;
-use microapi\events\EventObject;
-use microapi\events\Events;
+use microapi\event\EventDriven;
+use microapi\event\Events;
+use microapi\event\object\AfterAction;
+use microapi\event\object\BeforeAction;
 use microapi\http\HttpException;
 
 class Controller implements EventDriven {
@@ -27,36 +28,7 @@ class Controller implements EventDriven {
      * @return bool
      */
     public function beforeAction(string $action, array $params = []): bool {
-        return $this->trigger(
-            'beforeaction',
-            new class($this, $action, $params) extends EventObject {
-                /**
-                 * @var string
-                 */
-                public $action;
-                /**
-                 * @var Controller
-                 */
-                public $controller;
-                /**
-                 * @var array
-                 */
-                public $params;
-
-                /**
-                 *  constructor.
-                 *
-                 * @param Controller $controller
-                 * @param string     $action
-                 * @param array      $params
-                 */
-                public function __construct(Controller $controller, string $action, array $params = []) {
-                    $this->action     = $action;
-                    $this->controller = $controller;
-                    $this->params     = $params;
-                }
-            }
-        )->isSuccess();
+        return !$this->trigger('beforeaction', new BeforeAction($this, $action, $params))->isStopped();
     }
 
     public function validateInputData(Validator $validator, DTO $object) {
@@ -66,33 +38,7 @@ class Controller implements EventDriven {
     }
 
     public function afterAction(string $action, $res) {
-        $responseEvent = new class($this, $action, $res) extends EventObject {
-            /**
-             * @var string
-             */
-            public $action;
-            /**
-             * @var Controller
-             */
-            public $controller;
-            /**
-             * @var array
-             */
-            public $response;
-
-            /**
-             *  constructor.
-             *
-             * @param Controller $controller
-             * @param string     $action
-             * @param            $response
-             */
-            public function __construct(Controller $controller, string $action, $response) {
-                $this->action     = $action;
-                $this->controller = $controller;
-                $this->response   = $response;
-            }
-        };
+        $responseEvent = new AfterAction($this, $action, $res);
 
         $this->trigger('afteraction', $responseEvent);
 

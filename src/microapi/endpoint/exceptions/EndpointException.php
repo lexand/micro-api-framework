@@ -6,7 +6,9 @@
  * Time: 20:17
  */
 
-namespace microapi\endpoint;
+declare(strict_types=1);
+
+namespace microapi\endpoint\exceptions;
 
 class EndpointException extends \RuntimeException {
 

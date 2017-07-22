@@ -72,7 +72,7 @@ class CacheBuilder {
         $pl2 = str_repeat($this->padding, 2);
         $pl3 = str_repeat($this->padding, 3);
         foreach ($rawCache as $httpMethod => $controllersData) {
-            $fh = fopen($httpMethod . '.php', 'wb');
+            $fh = fopen('endpoints_' . $httpMethod . '.php', 'wb');
 
             $this->writeHeader($fh);
             fwrite($fh, "return [\n");

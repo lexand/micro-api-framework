@@ -9,9 +9,10 @@
 namespace app\controller;
 
 use GuzzleHttp\Client;
+use PHPUnit\Framework\TestCase;
 use tests\utils\TestServer;
 
-class ControllerTest extends \PHPUnit_Framework_TestCase {
+class ControllerTest extends TestCase {
     /**
      * @var \GuzzleHttp\Client
      */
