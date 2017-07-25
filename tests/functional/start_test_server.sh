@@ -18,7 +18,7 @@ if [ -f "test-server.pid" ]; then
   rm test-server.pid
 fi
 
-nohup php -S localhost:${PORT} ${SCRIPT_DIR}/router.php >> /dev/null &
+nohup php -d xdebug.remote_autostart=1 -d xdebug.remote_enable=1 -S localhost:${PORT} ${SCRIPT_DIR}/router.php >> /dev/null &
 echo $! > test-server.pid
 
 cd ${CURR_DIR}

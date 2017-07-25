@@ -38,7 +38,7 @@ class Test6547586Ctl extends Controller {
      * @param string $c
      * @param bool   $d
      * @return array
-     * @methods (get)
+     * @methods (get,post)
      */
     public function actionPostparametrized(int $a, float $b, string $c, bool $d) {
         return compact(['a', 'b', 'c', 'd']);

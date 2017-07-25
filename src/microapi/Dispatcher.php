@@ -171,12 +171,12 @@ class Dispatcher implements EventDriven {
         try {
             $endpoint = $this->getEndpoint();
 
-            if (!$this->beforeDispatch($endpoint)) {
-                throw new HttpException('request rejected', HttpException::SERVER_ERROR);
-            }
-
             if ($endpoint === null) {
                 throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
+            }
+
+            if (!$this->beforeDispatch($endpoint)) {
+                throw new HttpException('request rejected', HttpException::SERVER_ERROR);
             }
 
             $params = $this->extractEndpointParams($endpoint);

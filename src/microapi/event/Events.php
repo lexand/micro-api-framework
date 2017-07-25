@@ -44,7 +44,7 @@ trait Events {
             foreach ($this->_e[$event] as $func) {
                 /** @var \microapi\event\Event $ef */
                 $ef = $func($ef);
-                if (!$ef->isStopped()) {
+                if ($ef->isStopped()) {
                     break;
                 }
             }
