@@ -10,6 +10,16 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
+/**
+ * Class CacheBuilder
+ *
+ * Build cache for endpoints, which avoid using reflection on every request.
+ *
+ * It creates cache files for every found HTTP method. For example endpoints_get.php for all controllers actions which
+ * should process GET request.
+ *
+ * @package microapi\endpoint
+ */
 class CacheBuilder {
 
     /**
@@ -24,6 +34,10 @@ class CacheBuilder {
 
     private $modulesNamespaces = [];
 
+    /**
+     * @param string $cachePath Path where cache filed will be stored.
+     * @return \microapi\endpoint\CacheBuilder
+     */
     public function setCachePath(string $cachePath): CacheBuilder {
         $this->cachePath = $cachePath;
 
@@ -31,7 +45,7 @@ class CacheBuilder {
     }
 
     /**
-     * all controllers should extends \microapiController
+     * all controllers should extends \microapi\Controller
      *
      * @param string $nsPrefix without leading and trailing slashes
      * @param array  $path
@@ -43,6 +57,9 @@ class CacheBuilder {
         return $this;
     }
 
+    /**
+     * Base method for build endpoints cache
+     */
     public function build() { $this->saveCache($this->extractData()); }
 
     private function addToCache(array &$cache, \ReflectionMethod $mr) {
@@ -157,8 +174,7 @@ __HDR__;
      * @return array
      * @internal
      */
-    public
-    function extractData(): array {
+    public function extractData(): array {
         $rawCache = [];
 
         foreach ($this->modulesNamespaces as $nsPrefix => $paths) {
@@ -191,5 +207,4 @@ __HDR__;
 
         return $rawCache;
     }
-
 }

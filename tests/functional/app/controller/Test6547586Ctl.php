@@ -8,8 +8,8 @@
 
 namespace app\controller;
 
-use microapi\Controller;
 use app\dto\TestDTO;
+use microapi\Controller;
 
 class Test6547586Ctl extends Controller {
     const SOME_CONSTANT = '12';
@@ -49,7 +49,7 @@ class Test6547586Ctl extends Controller {
      * @return \app\dto\TestDTO
      * @methods (get, post)
      */
-    public function actionPostdto(TestDTO $dto) : TestDTO{
+    public function actionGetPostdto(TestDTO $dto) : TestDTO{
         return $dto;
     }
 

@@ -7,8 +7,33 @@
 
 return [
   'app\controller\Test6547586Ctl' => [
-    'postdto' => [
-      'methodName' => 'actionPostdto',
+    'postparametrized' => [
+      'methodName' => 'actionPostparametrized',
+      'paramsMeta' => [
+        'a' => [
+          'optional' => false,
+          'type' => 'int',
+          'builtin' => true,
+        ],
+        'b' => [
+          'optional' => false,
+          'type' => 'float',
+          'builtin' => true,
+        ],
+        'c' => [
+          'optional' => false,
+          'type' => 'string',
+          'builtin' => true,
+        ],
+        'd' => [
+          'optional' => false,
+          'type' => 'bool',
+          'builtin' => true,
+        ],
+      ],
+    ],
+    'getpostdto' => [
+      'methodName' => 'actionGetPostdto',
       'paramsMeta' => [
         'dto' => [
           'optional' => false,

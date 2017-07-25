@@ -68,19 +68,6 @@ return [
                                         ],
                                 ],
                         ],
-                    'postdto'          =>
-                        [
-                            'methodName' => 'actionPostdto',
-                            'paramsMeta' =>
-                                [
-                                    'dto' =>
-                                        [
-                                            'optional' => false,
-                                            'builtin'  => false,
-                                            'type'     => 'app\\dto\\TestDTO',
-                                        ],
-                                ],
-                        ],
                     'checkconst'       =>
                         [
                             'methodName' => 'actionCheckconst',
@@ -96,15 +83,28 @@ return [
                                         ],
                                 ],
                         ],
+                    'getpostdto'          =>
+                        [
+                            'methodName' => 'actionGetPostdto',
+                            'paramsMeta' =>
+                                [
+                                    'dto' =>
+                                        [
+                                            'optional' => false,
+                                            'builtin'  => false,
+                                            'type'     => 'app\\dto\\TestDTO',
+                                        ],
+                                ],
+                        ],
                 ],
         ],
     'post' =>
         [
             'app\\controller\\Test6547586Ctl' =>
                 [
-                    'postdto'       =>
+                    'getpostdto'       =>
                         [
-                            'methodName' => 'actionPostdto',
+                            'methodName' => 'actionGetPostdto',
                             'paramsMeta' =>
                                 [
                                     'dto' =>
@@ -146,6 +146,37 @@ return [
                                             'builtin'           => true,
                                             'defaultIsConstant' => true,
                                             'default'           => 'app\\controller\\Test6547586Ctl::SOME_CONSTANT',
+                                        ],
+                                ],
+                        ],
+                    'postparametrized' =>
+                        [
+                            'methodName' => 'actionPostparametrized',
+                            'paramsMeta' =>
+                                [
+                                    'a' =>
+                                        [
+                                            'optional' => false,
+                                            'type'     => 'int',
+                                            'builtin'  => true,
+                                        ],
+                                    'b' =>
+                                        [
+                                            'optional' => false,
+                                            'type'     => 'float',
+                                            'builtin'  => true,
+                                        ],
+                                    'c' =>
+                                        [
+                                            'optional' => false,
+                                            'type'     => 'string',
+                                            'builtin'  => true,
+                                        ],
+                                    'd' =>
+                                        [
+                                            'optional' => false,
+                                            'type'     => 'bool',
+                                            'builtin'  => true,
                                         ],
                                 ],
                         ],

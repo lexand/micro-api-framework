@@ -1,6 +1,7 @@
 {
   "name": "lexand/micro-api-framework",
   "description": "API (or single page application) oriented micro framework",
+  "version": "0.0.16-alpha",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [

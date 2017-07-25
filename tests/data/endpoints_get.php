@@ -52,8 +52,8 @@ return [
         ],
       ],
     ],
-    'postdto' => [
-      'methodName' => 'actionPostdto',
+    'getpostdto' => [
+      'methodName' => 'actionGetPostdto',
       'paramsMeta' => [
         'dto' => [
           'optional' => false,

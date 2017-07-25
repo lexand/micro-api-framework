@@ -82,17 +82,28 @@ class ControllerTest extends TestCase {
      * @param array  $data
      * @return array
      */
-    private function doRequest(string $method, string $endPoint, array $data = []) : array {
+    private function doRequest(string $method, string $endPoint, array $data = []): array {
         switch ($method) {
             case 'get':
-                $response = static::$client->get($endPoint);
+                if ($data === []) {
+                    $response = static::$client->get($endPoint);
+                }
+                else {
+                    $response = static::$client->get(
+                        $endPoint,
+                        [
+                            'content-type' => 'application/json',
+                            'json'         => $data
+                        ]
+                    );
+                }
                 break;
             case 'post':
                 $response = static::$client->post(
                     $endPoint,
                     [
                         'content-type' => 'application/json',
-                        'json' => $data
+                        'json'         => $data
                     ]
                 );
                 break;
@@ -110,16 +121,39 @@ class ControllerTest extends TestCase {
         return \GuzzleHttp\json_decode($body, true);
     }
 
-    public function testPostdto() {
+    public function testGetPostdtoViaPost() {
         $port = TestServer::PORT;
 
-        $endPoint = "http://localhost:{$port}/test6547586/postdto";
+        $endPoint = "http://localhost:{$port}/test6547586/getpostdto";
 
-        $name     = 'Alex';
-        $age      = 10;
+        $name = 'Alex';
+        $age  = 10;
 
         $response = $this->doRequest(
             'post',
+            $endPoint,
+            [
+                'name' => $name,
+                'age'  => $age
+            ]
+        );
+
+        static::assertArrayHasKey('name', $response);
+        static::assertArrayHasKey('age', $response);
+        static::assertEquals($name, $response['name']);
+        static::assertEquals($age, $response['age']);
+    }
+
+    public function testGetPostdtoViaGet() {
+        $port = TestServer::PORT;
+
+        $endPoint = "http://localhost:{$port}/test6547586/getpostdto";
+
+        $name = 'Alex';
+        $age  = 10;
+
+        $response = $this->doRequest(
+            'get',
             $endPoint,
             [
                 'name' => $name,
@@ -138,8 +172,8 @@ class ControllerTest extends TestCase {
 
         $endPoint = "http://localhost:{$port}/test6547586/postmixedargs/somestring";
 
-        $name     = 'Alex';
-        $age      = 10;
+        $name = 'Alex';
+        $age  = 10;
 
         $response = $this->doRequest(
             'post',
