@@ -20,11 +20,16 @@
         "tests/units/microapi/"
       ],
       "tests\\utils\\": "tests/utils"
-    }
+    },
+    "files": [
+      "src/microapi/message_funcs.php"
+    ]
   },
   "require": {
     "php": ">=7.0",
-    "psr/log": "~1.0"
+    "psr/log": "~1.0",
+    "psr/http-message": "1.*",
+    "guzzlehttp/psr7": "1.*"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "6.*",
