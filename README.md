@@ -8,5 +8,4 @@ changed via \microapi\dto\DtoFactory) through HTTP methods to application and re
 DTO idea was selected to solve validation problem of input data and simplification in documenting API methods.  
 
 ## TODO
-1. Possibly add PSR-7 support
-2. Add example for access filters
+1. Add example for access filters

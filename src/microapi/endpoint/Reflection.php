@@ -12,12 +12,13 @@ namespace microapi\endpoint;
 
 use microapi\endpoint\exceptions\EndpointActionNotFoundException;
 use microapi\endpoint\exceptions\EndpointControllerNotFoundException;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Reflection {
     /**
-     * @var string
+     * @var ServerRequestInterface
      */
-    private $method;
+    private $request;
     /**
      * @var string
      */
@@ -31,12 +32,12 @@ class Reflection {
     /**
      * Reflection constructor.
      *
-     * @param string $method
-     * @param string $fqcnCtl
-     * @param string $action
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string                                   $fqcnCtl
+     * @param string                                   $action
      */
-    public function __construct(string $method, string $fqcnCtl, string $action) {
-        $this->method  = $method;
+    public function __construct(ServerRequestInterface $request, string $fqcnCtl, string $action) {
+        $this->request = $request;
         $this->fqcnCtl = $fqcnCtl;
         $this->action  = strtolower($action);
     }
@@ -54,9 +55,9 @@ class Reflection {
                 }
             }
 
-            if ($found && static::isHttpMethodAllowed($this->method, $mr)) {
+            if ($found && static::isHttpMethodAllowed($this->request->getMethod(), $mr)) {
                 return new Endpoint(
-                    $this->method,
+                    $this->request,
                     $ctl,
                     [
                         'methodName' => $mr->getName(),
@@ -71,7 +72,7 @@ class Reflection {
     }
 
     public static function isHttpMethodAllowed(string $method, \ReflectionMethod $mr): bool {
-        return in_array($method, static::getActionHttpMethods($mr), true);
+        return in_array(strtolower($method), static::getActionHttpMethods($mr), true);
     }
 
     public static function getActionHttpMethods(\ReflectionMethod $mr): array {
@@ -82,7 +83,12 @@ class Reflection {
             preg_match('/@methods\s*\((.+?)\)/m', $doc, $matches);
 
             if (count($matches) === 2) {
-                return array_map('trim', explode(',', $matches[1]));
+                return array_map(
+                    function (string $el): string {
+                        return strtolower(trim($el));
+                    },
+                    explode(',', $matches[1])
+                );
             }
         }
 

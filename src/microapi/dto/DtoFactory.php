@@ -8,6 +8,8 @@
 
 namespace microapi\dto;
 
+use Psr\Http\Message\StreamInterface;
+
 interface DtoFactory {
-    public function create (string $class, string $rawData) : DTO;
+    public function create (string $class, StreamInterface $stream) : DTO;
 }

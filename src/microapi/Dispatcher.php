@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace microapi;
 
+use GuzzleHttp\Psr7\ServerRequest;
 use microapi\dto\DtoFactory;
 use microapi\dto\DtoFactoryDefault;
 use microapi\endpoint\Endpoint;
@@ -19,10 +20,13 @@ use microapi\endpoint\exceptions\EndpointException;
 use microapi\endpoint\exceptions\EndpointInvokeRejectedException;
 use microapi\endpoint\Reflection;
 use microapi\event\EventDriven;
+use microapi\event\Events;
 use microapi\event\object\AfterDispatch;
 use microapi\event\object\BeforeDispatch;
-use microapi\event\Events;
 use microapi\http\HttpException;
+use microapi\util\Tokenizer;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -30,18 +34,6 @@ class Dispatcher implements EventDriven {
 
     use Events;
 
-    /**
-     * @var string
-     */
-    private $uri;
-    /**
-     * @var string
-     */
-    private $method;
-    /**
-     * @var array
-     */
-    private $uriComponents;
     /**
      * @var Dispatcher
      */
@@ -164,22 +156,26 @@ class Dispatcher implements EventDriven {
      * Perform real request
      *
      * @throws HttpException
+     * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
+     * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
      */
     public function dispatch() {
-        $this->preDispatch();
+        $request = ServerRequest::fromGlobals();
 
         try {
-            $endpoint = $this->getEndpoint();
+            $tokenizer = new Tokenizer($request->getUri()->getPath(), '/', $this->skipPathComponents);
+
+            $endpoint = $this->getEndpoint($tokenizer, $request);
 
             if ($endpoint === null) {
                 throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
             }
 
-            if (!$this->beforeDispatch($endpoint)) {
+            if (!$this->beforeDispatch($request, $endpoint)) {
                 throw new HttpException('request rejected', HttpException::SERVER_ERROR);
             }
 
-            $params = $this->extractEndpointParams($endpoint);
+            $params = $this->extractEndpointParams($tokenizer, $request->getBody(), $endpoint);
 
             try {
                 $this->afterDispatch($endpoint->invoke($params));
@@ -203,33 +199,7 @@ class Dispatcher implements EventDriven {
         echo json_encode($data, JSON_UNESCAPED_UNICODE, JSON_PRESERVE_ZERO_FRACTION);
     }
 
-    /**
-     * @return string
-     */
-    private function getRaw(): string {
-        $fh      = fopen('php://input', 'b');
-        $rawPost = fgets($fh);
-        fclose($fh);
-
-        if ($rawPost === false) {
-            return '';
-        }
-
-        return $rawPost;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getNextUriComponent() {
-        if (empty($this->uriComponents)) {
-            return null;
-        }
-
-        return array_shift($this->uriComponents);
-    }
-
-    public static function get() {
+     public static function get() {
         if (static::$instance === null) {
             static::$instance = new Dispatcher();
         }
@@ -252,19 +222,6 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * @internal
-     */
-    public function preDispatch() {
-        $this->uri    = $_SERVER['REQUEST_URI'];
-        $this->method = strtolower($_SERVER['REQUEST_METHOD']);
-
-        $parsedUrl = parse_url($this->uri);
-        $path      = ltrim($parsedUrl['path'], '//');
-        // skip several components of the URI path, for example /api etc
-        $this->uriComponents = array_slice(explode('/', $path), $this->skipPathComponents);
-    }
-
-    /**
      * @param int $skipPathComponents
      * @return Dispatcher
      */
@@ -274,8 +231,8 @@ class Dispatcher implements EventDriven {
         return $this;
     }
 
-    private function beforeDispatch(Endpoint $endpoint): bool {
-        return !$this->trigger('beforedispatch', new BeforeDispatch($this->uri, $endpoint))->isStopped();
+    private function beforeDispatch(ServerRequestInterface $request, Endpoint $endpoint): bool {
+        return !$this->trigger('beforedispatch', new BeforeDispatch($request, $endpoint))->isStopped();
     }
 
     private function afterDispatch($data) {
@@ -283,43 +240,43 @@ class Dispatcher implements EventDriven {
     }
 
     /**
+     * @param \microapi\util\Tokenizer                 $tokenizer
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return \microapi\endpoint\Endpoint|null
-     * @throws \microapi\http\HttpException
-     * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
-     * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
      * @internal
      */
-    public function getEndpoint() {
+    public function getEndpoint(Tokenizer $tokenizer, ServerRequestInterface $request) {
         // module or controller name
-        $part = $this->getNextUriComponent();
+        $part = $tokenizer->next();
         if (isset($this->modulesNamespaces[$part])) {
-            $ctlName = $this->getNextUriComponent();
+            $ctlName = $tokenizer->next();
             $fqcnCtl = $this->modulesNamespaces[$part] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
         }
         else {
             $fqcnCtl = $this->modulesNamespaces['__default'] . '\controller\\' . ucfirst($part) . 'Ctl';
         }
 
-        $actionName = $this->getNextUriComponent();
+        $actionName = $tokenizer->next();
 
-        $endpoint = $this->getEndpointFromCache($this->method, $fqcnCtl, $actionName);
+        $endpoint = $this->getEndpointFromCache($request, $fqcnCtl, $actionName);
         if ($endpoint === null) {
-            $endpoint = $this->getEndpointFromReflection($this->method, $fqcnCtl, $actionName);
+            $endpoint = $this->getEndpointFromReflection($request, $fqcnCtl, $actionName);
         }
 
         return $endpoint;
     }
 
     /**
-     * @param string $method
-     * @param string $fqcnCtl
-     * @param string $action
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string                                   $fqcnCtl
+     * @param string                                   $action
      * @return \microapi\endpoint\Endpoint|null
      * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
      * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
      * @internal
      */
-    public function getEndpointFromCache(string $method, string $fqcnCtl, string $action) {
+    public function getEndpointFromCache(ServerRequestInterface $request, string $fqcnCtl, string $action) {
+        $method = strtolower($request->getMethod());
         if (empty($this->endPointCache[$method])) {
             $this->loadEndpointCache($method);
         }
@@ -330,7 +287,7 @@ class Dispatcher implements EventDriven {
                 $actions = $controllers[$fqcnCtl];
                 if (isset($actions[$action])) {
                     return new Endpoint(
-                        $method,
+                        $request,
                         new $fqcnCtl(),
                         $actions[$action]
                     );
@@ -351,17 +308,17 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * @param string $method
-     * @param string $fqcnCtl
-     * @param string $action
+     * @param ServerRequestInterface $request
+     * @param string                 $fqcnCtl
+     * @param string                 $action
      * @return \microapi\endpoint\Endpoint|null
      * @throws \microapi\http\HttpException
      * @internal
      */
-    public function getEndpointFromReflection(string $method, string $fqcnCtl, string $action) {
+    public function getEndpointFromReflection(ServerRequestInterface $request, string $fqcnCtl, string $action) {
         if ($this->reflationAllowed) {
             try {
-                return (new Reflection($method, $fqcnCtl, $action))->getEndpoint();
+                return (new Reflection($request, $fqcnCtl, $action))->getEndpoint();
             }
             catch (EndpointException $e) {
                 throw new HttpException($e->getMessage(), HttpException::NOT_FOUND);
@@ -372,17 +329,18 @@ class Dispatcher implements EventDriven {
     }
 
     /**
-     * @param \microapi\endpoint\Endpoint $endpoint
+     * @param \microapi\util\Tokenizer          $tokenizer
+     * @param \Psr\Http\Message\StreamInterface $stream
+     * @param \microapi\endpoint\Endpoint       $endpoint
      * @return array
-     * @throws \microapi\http\HttpException
      */
-    public function extractEndpointParams(Endpoint $endpoint): array {
+    public function extractEndpointParams(Tokenizer $tokenizer, StreamInterface $stream, Endpoint $endpoint): array {
         // prepare arguments and DTO
         $paramsMeta = $endpoint->getParamsMeta();
         $params     = [];
         foreach ($paramsMeta as $paramName => $meta) {
             if ($meta['builtin']) {
-                $val = $this->getNextUriComponent();
+                $val = $tokenizer->next();
                 if (($val === null) && !$meta['optional']) {
                     $params[$paramName] = $meta['default'];
                 }
@@ -391,7 +349,7 @@ class Dispatcher implements EventDriven {
                 }
             }
             else {
-                $params[$paramName] = $this->dtoFactory()->create($meta['type'], $this->getRaw());
+                $params[$paramName] = $this->dtoFactory()->create($meta['type'], $stream);
             }
         }
 

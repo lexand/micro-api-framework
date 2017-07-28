@@ -10,7 +10,10 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
+use GuzzleHttp\Psr7\Response;
 use microapi\Controller;
+use microapi\endpoint\exceptions\EndpointInvokeRejectedException;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Endpoint {
     /**
@@ -18,9 +21,9 @@ class Endpoint {
      */
     private $controller;
     /**
-     * @var string
+     * @var \Psr\Http\Message\ServerRequestInterface
      */
-    private $httpMethod;
+    private $request;
 
     /**
      * @var string
@@ -32,23 +35,23 @@ class Endpoint {
     /**
      * Endpoint constructor.
      *
-     * @param string               $httpMethod HTTP method
-     * @param \microapi\Controller $controller
-     * @param array                $actionMeta
+     * @param \Psr\Http\Message\ServerRequestInterface $request HTTP method
+     * @param \microapi\Controller                     $controller
+     * @param array                                    $actionMeta
      */
-    public function __construct(string $httpMethod,
-                                \microapi\Controller $controller,
+    public function __construct(ServerRequestInterface $request,
+                                Controller $controller,
                                 array $actionMeta) {
 
-        $this->controller   = $controller;
-        $this->actionMeta   = $actionMeta;
-        $this->httpMethod   = $httpMethod;
+        $this->controller = $controller;
+        $this->actionMeta = $actionMeta;
+        $this->request    = $request;
     }
 
     /**
      * @return \microapi\Controller
      */
-    public function getController(): \microapi\Controller { return $this->controller; }
+    public function getController(): Controller { return $this->controller; }
 
     /**
      * @return string
@@ -63,18 +66,25 @@ class Endpoint {
     public function getParamsMeta(): array { return $this->actionMeta['paramsMeta']; }
 
     /**
-     * @return string
+     * @return \Psr\Http\Message\ServerRequestInterface
      */
-    public function getHttpMethod(): string { return $this->httpMethod; }
+    public function getRequest(): ServerRequestInterface { return $this->request; }
 
     /**
      * @return string
      */
     public function getUri(): string { return $this->uri; }
 
+    /**
+     * @param array $params
+     * @return array
+     * @throws \microapi\endpoint\exceptions\EndpointInvokeRejectedException
+     */
     public function invoke(array $params = []) {
 
+        $this->controller->setRequest($this->request);
         if ($this->controller->beforeAction($this->getActionName(), $params)) {
+            $this->controller->setResponse(new Response());
             if ($params === []) {
                 $res = call_user_func([$this->controller, $this->actionMeta['methodName']]);
             }
@@ -82,8 +92,10 @@ class Endpoint {
                 $res = call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
             }
 
+            // todo: pass request and response
             return $this->controller->afterAction($this->getActionName(), $res);
         }
+        // todo: specify the reason (textual representation) of exception
         throw new EndpointInvokeRejectedException();
     }
 }

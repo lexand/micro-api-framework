@@ -20,6 +20,16 @@ class Controller implements EventDriven {
     use Events;
 
     /**
+     * @var \Psr\Http\Message\ServerRequestInterface
+     */
+    protected $request;
+
+    /**
+     * @var \Psr\Http\Message\ResponseInterface
+     */
+    protected $response;
+
+    /**
      * @param string $action
      * @param array  $params
      * @return bool
@@ -34,5 +44,39 @@ class Controller implements EventDriven {
         $this->trigger('afteraction', $responseEvent);
 
         return $responseEvent->response;
+    }
+
+    /**
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    public function getRequest(): \Psr\Http\Message\ServerRequestInterface {
+        return $this->request;
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return static
+     */
+    public function setRequest(\Psr\Http\Message\ServerRequestInterface $request) {
+        $this->request = $request;
+
+        return $this;
+    }
+
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getResponse(): \Psr\Http\Message\ResponseInterface {
+        return $this->response;
+    }
+
+    /**
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @return static
+     */
+    public function setResponse(\Psr\Http\Message\ResponseInterface $response) {
+        $this->response = $response;
+
+        return $this;
     }
 }

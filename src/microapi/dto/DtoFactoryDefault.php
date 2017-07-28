@@ -10,9 +10,11 @@ declare(strict_types=1);
 
 namespace microapi\dto;
 
+use Psr\Http\Message\StreamInterface;
+
 class DtoFactoryDefault implements DtoFactory {
 
-    public function create(string $class, string $rawData): DTO {
-        return new $class(json_decode($rawData, true));
+    public function create(string $class, StreamInterface $stream): DTO {
+        return new $class(json_decode($stream->getContents(), true));
     }
 }
