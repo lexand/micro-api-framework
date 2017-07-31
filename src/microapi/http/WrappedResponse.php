@@ -34,8 +34,8 @@ class WrappedResponse {
      * @param \Psr\Http\Message\ResponseInterface      $response
      */
     public function __construct(
-        $data,
         \Psr\Http\Message\ServerRequestInterface $request,
+        $data,
         \Psr\Http\Message\ResponseInterface $response = null
     ) {
         $this->data     = $data;

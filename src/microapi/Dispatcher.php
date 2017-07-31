@@ -27,8 +27,6 @@ use microapi\http\WrappedResponse;
 use microapi\util\Tokenizer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 class Dispatcher implements EventDriven {
 
@@ -50,10 +48,6 @@ class Dispatcher implements EventDriven {
     private $endpointCachePath;
 
     private $endPointCache = [];
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
 
     /**
      * @var int
@@ -180,18 +174,8 @@ class Dispatcher implements EventDriven {
             $this->afterDispatch($endpoint->invoke($params));
         }
         catch (\Throwable $t) {
-            $this->afterDispatch(new WrappedResponse($t, $request));
+            $this->afterDispatch(new WrappedResponse($request, $t));
         }
-    }
-
-    /**
-     * @param array|\JsonSerializable $data
-     * @param int                     $code
-     */
-    public function response($data, int $code = 200) {
-        http_response_code($code);
-        header('Content-Type: application/json');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE, JSON_PRESERVE_ZERO_FRACTION);
     }
 
     public static function get() {
@@ -200,20 +184,6 @@ class Dispatcher implements EventDriven {
         }
 
         return static::$instance;
-    }
-
-    public function log(): \Psr\Log\LoggerInterface {
-        if ($this->logger === null) {
-            $this->logger = new NullLogger();
-        }
-
-        return $this->logger;
-    }
-
-    public function setLog(LoggerInterface $li): Dispatcher {
-        $this->logger = $li;
-
-        return $this;
     }
 
     /**

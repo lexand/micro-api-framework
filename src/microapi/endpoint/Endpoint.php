@@ -83,6 +83,6 @@ class Endpoint {
 
         $res = $this->controller->afterAction($this->getActionName(), $res);
 
-        return new WrappedResponse($res, $this->request, $this->controller->getResponse());
+        return new WrappedResponse($this->request, $res, $this->controller->getResponse());
     }
 }
