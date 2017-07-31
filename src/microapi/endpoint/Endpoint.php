@@ -48,34 +48,23 @@ class Endpoint {
         $this->request    = $request;
     }
 
-    /**
-     * @return \microapi\Controller
-     */
     public function getController(): Controller { return $this->controller; }
 
-    /**
-     * @return string
-     */
     public function getActionMethod(): string { return $this->actionMeta['methodName']; }
 
     public function getActionName(): string { return strtolower(substr($this->actionMeta['methodName'], 6)); }
 
-    /**
-     * @return array
-     */
     public function getParamsMeta(): array { return $this->actionMeta['paramsMeta']; }
 
-    /**
-     * @return \Psr\Http\Message\ServerRequestInterface
-     */
     public function getRequest(): ServerRequestInterface { return $this->request; }
 
-    /**
-     * @return string
-     */
     public function getUri(): string { return $this->uri; }
 
     /**
+     * - create controller/action state (future HTTP response)
+     * - call beforeAction/action/afterAction
+     * - combine action result, initial request and response into \microapi\http\WrappedResponse
+     *
      * @param array $params
      * @return \microapi\http\WrappedResponse
      */
