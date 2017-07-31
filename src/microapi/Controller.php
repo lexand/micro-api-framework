@@ -30,20 +30,33 @@ class Controller implements EventDriven {
     protected $response;
 
     /**
+     * - plugin support
+     * - change request
+     * - permission to call action
+     *
+     * If action should not be called? event handler should throw HttpException
+     *
      * @param string $action
      * @param array  $params
-     * @return bool
      */
-    public function beforeAction(string $action, array $params = []): bool {
-        return !$this->trigger('beforeaction', new BeforeAction($this, $action, $params))->isStopped();
+    public function beforeAction(string $action, array $params = []) {
+        $this->trigger('beforeaction', new BeforeAction($this, $action, $params));
     }
 
+    /**
+     * - plugin support
+     * - decorate action result
+     *
+     * @param string $action
+     * @param mixed  $res action result
+     * @return mixed
+     */
     public function afterAction(string $action, $res) {
         $responseEvent = new AfterAction($this, $action, $res);
 
         $this->trigger('afteraction', $responseEvent);
 
-        return $responseEvent->response;
+        return $responseEvent->actionResult;
     }
 
     /**
@@ -64,6 +77,8 @@ class Controller implements EventDriven {
     }
 
     /**
+     * Return internal state (future part of HTTP response) not related directly to action result
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function getResponse(): \Psr\Http\Message\ResponseInterface {
@@ -71,6 +86,8 @@ class Controller implements EventDriven {
     }
 
     /**
+     * set initial internal state (future part of HTTP response)
+     *
      * @param \Psr\Http\Message\ResponseInterface $response
      * @return static
      */

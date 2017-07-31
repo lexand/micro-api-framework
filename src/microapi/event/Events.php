@@ -16,11 +16,13 @@ trait Events {
     private $_e = [];
 
     /**
+     * add event listener/handler
+     *
      * @param string     $event
      * @param callable[] $f
-     * @return \microapi\event\EventDriven
+     * @return static
      */
-    public function on(string $event, array $f): EventDriven {
+    public function on(string $event, array $f){
 
         $event = strtolower($event);
 

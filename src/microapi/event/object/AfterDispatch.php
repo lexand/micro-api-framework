@@ -11,14 +11,18 @@ declare(strict_types=1);
 namespace microapi\event\object;
 
 use microapi\event\Event;
+use microapi\http\WrappedResponse;
 
 class AfterDispatch extends Event {
-    public $data = [];
+    /**
+     * @var \microapi\http\WrappedResponse
+     */
+    public $wr;
 
     /**
      *  constructor.
      *
-     * @param mixed $data
+     * @param WrappedResponse $data
      */
-    public function __construct($data) { $this->data = $data; }
+    public function __construct(WrappedResponse $data) { $this->wr = $data; }
 }

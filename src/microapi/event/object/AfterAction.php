@@ -23,20 +23,20 @@ class AfterAction extends Event {
      */
     public $controller;
     /**
-     * @var array
+     * @var mixed
      */
-    public $response;
+    public $actionResult;
 
     /**
      *  constructor.
      *
      * @param Controller $controller
      * @param string     $action
-     * @param            $response
+     * @param mixed      $actionResult
      */
-    public function __construct(Controller $controller, string $action, $response) {
-        $this->action     = $action;
-        $this->controller = $controller;
-        $this->response   = $response;
+    public function __construct(Controller $controller, string $action, $actionResult) {
+        $this->action       = $action;
+        $this->controller   = $controller;
+        $this->actionResult = $actionResult;
     }
 }

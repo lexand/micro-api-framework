@@ -29,7 +29,7 @@ class DispatcherTest extends TestCase {
         self::assertNotNull($end);
 
         $res = $end->invoke();
-        static::assertEquals((new Test6547586Ctl())->actionGet(), $res);
+        static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 
     public function testGetEndpointFromReflection() {
@@ -43,7 +43,7 @@ class DispatcherTest extends TestCase {
         self::assertNotNull($end);
 
         $res = $end->invoke();
-        static::assertEquals((new Test6547586Ctl())->actionGet(), $res);
+        static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 
     public function testGetEndpoint() {
@@ -64,14 +64,15 @@ class DispatcherTest extends TestCase {
         self::assertNotNull($end);
 
         $res = $end->invoke();
-        static::assertEquals((new Test6547586Ctl())->actionGet(), $res);
+        static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 
     public function testDispatch() {
         $_SERVER['REQUEST_URI']    = '/test6547586/get';
         $_SERVER['REQUEST_METHOD'] = 'get';
 
-        $data = [];
+        /** @var \microapi\http\WrappedResponse $data */
+        $data = null;
 
         $d = new Dispatcher();
         $d->addDefaultModule('\app');
@@ -80,7 +81,7 @@ class DispatcherTest extends TestCase {
             [
                 function (Event $e) use (&$data) {
                     /** @var \microapi\event\object\AfterDispatch $e */
-                    $data = $e->data;
+                    $data = $e->wr;
 
                     return $e;
                 }
@@ -88,6 +89,6 @@ class DispatcherTest extends TestCase {
         );
         $d->dispatch();
 
-        static::assertEquals((new Test6547586Ctl())->actionGet(), $data);
+        static::assertEquals((new Test6547586Ctl())->actionGet(), $data->data);
     }
 }

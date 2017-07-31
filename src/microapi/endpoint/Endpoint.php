@@ -12,7 +12,7 @@ namespace microapi\endpoint;
 
 use GuzzleHttp\Psr7\Response;
 use microapi\Controller;
-use microapi\endpoint\exceptions\EndpointInvokeRejectedException;
+use microapi\http\WrappedResponse;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Endpoint {
@@ -77,25 +77,23 @@ class Endpoint {
 
     /**
      * @param array $params
-     * @return array
-     * @throws \microapi\endpoint\exceptions\EndpointInvokeRejectedException
+     * @return \microapi\http\WrappedResponse
      */
-    public function invoke(array $params = []) {
-
+    public function invoke(array $params = []): WrappedResponse {
         $this->controller->setRequest($this->request);
-        if ($this->controller->beforeAction($this->getActionName(), $params)) {
-            $this->controller->setResponse(new Response());
-            if ($params === []) {
-                $res = call_user_func([$this->controller, $this->actionMeta['methodName']]);
-            }
-            else {
-                $res = call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
-            }
+        $this->controller->setResponse(new Response());
 
-            // todo: pass request and response
-            return $this->controller->afterAction($this->getActionName(), $res);
+        $this->controller->beforeAction($this->getActionName(), $params);
+
+        if ($params === []) {
+            $res = call_user_func([$this->controller, $this->actionMeta['methodName']]);
         }
-        // todo: specify the reason (textual representation) of exception
-        throw new EndpointInvokeRejectedException();
+        else {
+            $res = call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
+        }
+
+        $res = $this->controller->afterAction($this->getActionName(), $res);
+
+        return new WrappedResponse($res, $this->request, $this->controller->getResponse());
     }
 }

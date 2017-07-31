@@ -12,9 +12,9 @@ interface EventDriven {
     /**
      * @param string $event
      * @param callable[]  $f
-     * @return \microapi\event\EventDriven
+     * @return static
      */
-    public function on(string $event, array $f) : EventDriven;
+    public function on(string $event, array $f);
 
     /**
      * @param string                $event

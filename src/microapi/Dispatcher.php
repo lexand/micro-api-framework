@@ -17,13 +17,13 @@ use microapi\endpoint\Endpoint;
 use microapi\endpoint\exceptions\EndpointActionNotFoundException;
 use microapi\endpoint\exceptions\EndpointControllerNotFoundException;
 use microapi\endpoint\exceptions\EndpointException;
-use microapi\endpoint\exceptions\EndpointInvokeRejectedException;
 use microapi\endpoint\Reflection;
 use microapi\event\EventDriven;
 use microapi\event\Events;
 use microapi\event\object\AfterDispatch;
 use microapi\event\object\BeforeDispatch;
 use microapi\http\HttpException;
+use microapi\http\WrappedResponse;
 use microapi\util\Tokenizer;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -39,9 +39,15 @@ class Dispatcher implements EventDriven {
      */
     private static $instance;
 
+    /**
+     * @var string[]
+     */
     private $modulesNamespaces = [];
 
-    private $endpointCachePath = null;
+    /**
+     * @var string
+     */
+    private $endpointCachePath;
 
     private $endPointCache = [];
     /**
@@ -49,9 +55,15 @@ class Dispatcher implements EventDriven {
      */
     private $logger;
 
+    /**
+     * @var int
+     */
     private $skipPathComponents = 0;
 
-    private $reflationAllowed = true;
+    /**
+     * @var bool
+     */
+    private $reflectionAllowed = true;
     /**
      * @var DtoFactory
      */
@@ -111,15 +123,18 @@ class Dispatcher implements EventDriven {
      * @param bool $reflationAllowed
      * @return Dispatcher
      */
-    public function setReflationAllowed(bool $reflationAllowed): Dispatcher {
-        $this->reflationAllowed = $reflationAllowed;
+    public function setReflectionAllowed(bool $reflationAllowed): Dispatcher {
+        $this->reflectionAllowed = $reflationAllowed;
 
         return $this;
     }
 
-
+    /**
+     * - plugins support
+     * - init plugins
+     */
     public function init() {
-        set_exception_handler([$this, 'exceptionHandler']);
+        $this->trigger('init');
     }
 
     private static function castType($value, $buildInType) {
@@ -137,19 +152,6 @@ class Dispatcher implements EventDriven {
             default:
                 throw new \LogicException('incorrect type');
         }
-    }
-
-    public function exceptionHandler(\Throwable $t) {
-
-        $this->log()->critical($t->getMessage(), ['server' => $_SERVER, 'trace' => $t->getTrace()]);
-
-        $this->response(
-            [
-                'error'     => true,
-                'errorMsg'  => $t->getMessage(),
-                'errorCode' => $t->getCode()
-            ]
-        );
     }
 
     /**
@@ -171,21 +173,14 @@ class Dispatcher implements EventDriven {
                 throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
             }
 
-            if (!$this->beforeDispatch($request, $endpoint)) {
-                throw new HttpException('request rejected', HttpException::SERVER_ERROR);
-            }
+            $this->beforeDispatch($request, $endpoint);
 
             $params = $this->extractEndpointParams($tokenizer, $request->getBody(), $endpoint);
 
-            try {
-                $this->afterDispatch($endpoint->invoke($params));
-            }
-            catch (EndpointInvokeRejectedException $e) {
-                throw new HttpException('request denied', HttpException::FORBIDDEN);
-            }
+            $this->afterDispatch($endpoint->invoke($params));
         }
         catch (\Throwable $t) {
-            $this->afterDispatch($t);
+            $this->afterDispatch(new WrappedResponse($t, $request));
         }
     }
 
@@ -199,7 +194,7 @@ class Dispatcher implements EventDriven {
         echo json_encode($data, JSON_UNESCAPED_UNICODE, JSON_PRESERVE_ZERO_FRACTION);
     }
 
-     public static function get() {
+    public static function get() {
         if (static::$instance === null) {
             static::$instance = new Dispatcher();
         }
@@ -231,11 +226,28 @@ class Dispatcher implements EventDriven {
         return $this;
     }
 
-    private function beforeDispatch(ServerRequestInterface $request, Endpoint $endpoint): bool {
-        return !$this->trigger('beforedispatch', new BeforeDispatch($request, $endpoint))->isStopped();
+    /**
+     * - plugins support
+     * - init controller event listeners/handlers
+     *
+     * If request should not be processed event handler should throw HttpException
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \microapi\endpoint\Endpoint              $endpoint
+     */
+    private function beforeDispatch(ServerRequestInterface $request, Endpoint $endpoint) {
+        $this->trigger('beforedispatch', new BeforeDispatch($request, $endpoint));
     }
 
-    private function afterDispatch($data) {
+    /**
+     * - plugins support
+     * - decorate action result
+     * - decorate errors/exceptions
+     * - render response
+     *
+     * @param \microapi\http\WrappedResponse $data
+     */
+    private function afterDispatch(WrappedResponse $data) {
         $this->trigger('afterdispatch', new AfterDispatch($data));
     }
 
@@ -316,7 +328,7 @@ class Dispatcher implements EventDriven {
      * @internal
      */
     public function getEndpointFromReflection(ServerRequestInterface $request, string $fqcnCtl, string $action) {
-        if ($this->reflationAllowed) {
+        if ($this->reflectionAllowed) {
             try {
                 return (new Reflection($request, $fqcnCtl, $action))->getEndpoint();
             }
@@ -364,15 +376,9 @@ class Dispatcher implements EventDriven {
         return $this->dtoFactory;
     }
 
-    /**
-     * @param \microapi\dto\DtoFactory $dtoFactory
-     * @return Dispatcher
-     */
     public function setDtoFactory(\microapi\dto\DtoFactory $dtoFactory): Dispatcher {
         $this->dtoFactory = $dtoFactory;
 
         return $this;
     }
-
-
 }

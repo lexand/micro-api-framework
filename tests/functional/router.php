@@ -20,34 +20,33 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
     return false;
 }
 
-$d = \microapi\Dispatcher::get()->addDefaultModule('\app');
+\microapi\Dispatcher::get()
+                    ->addDefaultModule('\app')
+                    ->on(
+                        'afterdispatch',
+                        [
+                            function (\microapi\event\Event $e): \microapi\event\Event {
+                                /** @var \microapi\event\object\AfterDispatch $e */
+                                if ($e->wr instanceof Throwable) {
+                                    $e->setStopped();
+                                    header('Content-Type: application/json');
+                                    echo json_encode(
+                                        [
+                                            'error' => true,
+                                            'msg'   => $e->wr->getMessage()
+                                        ]
+                                    );
+                                }
 
-$d->on(
-    'afterdispatch',
-    [
-        function (\microapi\event\Event $e): \microapi\event\Event {
-            /** @var \microapi\event\object\AfterDispatch $e */
-            if ($e->data instanceof Throwable) {
-                $e->setStopped();
-                header('Content-Type: application/json');
-                echo json_encode(
-                    [
-                        'error' => true,
-                        'msg'   => $e->data->getMessage()
-                    ]
-                );
-            }
+                                return $e;
+                            },
+                            function (\microapi\event\Event $e): \microapi\event\Event {
+                                /** @var \microapi\event\object\AfterDispatch $e */
+                                header('Content-Type: application/json');
+                                echo json_encode($e->wr->data);
 
-            return $e;
-        },
-        function (\microapi\event\Event $e): \microapi\event\Event {
-            /** @var \microapi\event\object\AfterDispatch $e */
-            header('Content-Type: application/json');
-            echo json_encode($e->data);
-
-            return $e;
-        }
-    ]
-);
-
-$d->dispatch();
+                                return $e;
+                            }
+                        ]
+                    )
+                    ->dispatch();
