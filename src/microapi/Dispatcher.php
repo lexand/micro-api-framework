@@ -73,17 +73,25 @@ class Dispatcher implements EventDriven {
      * @var string[]
      */
     private $defaultControllers;
+    /**
+     * @var \Psr\Http\Message\ServerRequestInterface
+     */
+    private $request;
 
     /**
      * App constructor.
      *
-     * @throws \LogicException
+     * @param \Psr\Http\Message\ServerRequestInterface|null $request
      */
-    public function __construct() {
+    public function __construct(ServerRequestInterface $request = null) {
         if (static::$instance !== null) {
             throw new \LogicException('only one instance allowed');
         }
 
+        if($request === null){
+            $request = ServerRequest::fromGlobals();
+        }
+        $this->request = $request;
         $this->init();
     }
 
@@ -176,20 +184,18 @@ class Dispatcher implements EventDriven {
      * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
      */
     public function dispatch() {
-        $request = ServerRequest::fromGlobals();
-
         try {
-            $tokenizer = new Tokenizer($request->getUri()->getPath(), '/', $this->skipPathComponents);
+            $tokenizer = new Tokenizer($this->request->getUri()->getPath(), '/', $this->skipPathComponents);
 
-            $endpoint = $this->getEndpoint($tokenizer, $request);
+            $endpoint = $this->getEndpoint($tokenizer, $this->request);
 
             if ($endpoint === null) {
                 throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
             }
 
-            $this->beforeDispatch($request, $endpoint);
+            $this->beforeDispatch($this->request, $endpoint);
 
-            $params = $this->extractEndpointParams($tokenizer, $request->getBody(), $endpoint);
+            $params = $this->extractEndpointParams($tokenizer, $this->request->getBody(), $endpoint);
 
             $this->afterDispatch($endpoint->invoke(
                 $this->getResponseFactory()->create(),
@@ -197,13 +203,13 @@ class Dispatcher implements EventDriven {
             ));
         }
         catch (\Throwable $t) {
-            $this->afterDispatch(new WrappedResponse($request, $t));
+            $this->afterDispatch(new WrappedResponse($this->request, $t));
         }
     }
 
-    public static function get() {
+    public static function get(ServerRequestInterface $request = null) {
         if (static::$instance === null) {
-            static::$instance = new Dispatcher();
+            static::$instance = new Dispatcher($request);
         }
 
         return static::$instance;
