@@ -15,6 +15,16 @@ use microapi\event\Events;
 use microapi\event\object\AfterAction;
 use microapi\event\object\BeforeAction;
 
+/**
+ * Class Controller
+ *
+ * If controller can be accessible via /[module/]controller it should containe
+ * actionIndex() method/
+ *
+ * actionIndex() method is the default method which will called if no action is specified in the URL.
+ *
+ * @package microapi
+ */
 class Controller implements EventDriven {
 
     use Events;

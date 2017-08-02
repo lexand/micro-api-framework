@@ -29,6 +29,8 @@ class ControllerTest extends TestCase {
         TestServer::stop();
     }
 
+
+
     public function testGet() {
         $port = TestServer::PORT;
 
@@ -189,5 +191,14 @@ class ControllerTest extends TestCase {
         static::assertEquals('somestring', $response['c']);
         static::assertEquals($name, $response['dto']['name']);
         static::assertEquals($age, $response['dto']['age']);
+    }
+
+    public function testIndex() {
+        $port = TestServer::PORT;
+
+        $endPoint = "http://localhost:{$port}/test6547586";
+
+        static::assertEquals((new Test6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
+
     }
 }

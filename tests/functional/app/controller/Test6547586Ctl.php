@@ -16,6 +16,14 @@ class Test6547586Ctl extends Controller {
 
     /**
      * @return array
+     * @methods(get)
+     */
+    public function actionIndex() {
+        return ['prompt' => 'hello this is index action'];
+    }
+
+    /**
+     * @return array
      * @methods (get)
      */
     public function actionGet() {

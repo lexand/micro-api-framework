@@ -120,6 +120,9 @@ class Dispatcher implements EventDriven {
     }
 
     /**
+     * If reflection not allowed and you add new actions into controllers without rebuilding endpoints-cache, then
+     * theses actions will not be visible to the Dispatcher
+     *
      * @param bool $reflationAllowed
      * @return Dispatcher
      */
@@ -248,6 +251,9 @@ class Dispatcher implements EventDriven {
         }
 
         $actionName = $tokenizer->next();
+        if ($actionName === null) {
+            $actionName = 'index';
+        }
 
         $endpoint = $this->getEndpointFromCache($request, $fqcnCtl, $actionName);
         if ($endpoint === null) {
@@ -376,11 +382,9 @@ class Dispatcher implements EventDriven {
      * @param \microapi\http\ResponseFactory $responseFactory
      * @return static
      */
-    public function setResponseFactory(\microapi\http\ResponseFactory $responseFactory) : Dispatcher{
+    public function setResponseFactory(\microapi\http\ResponseFactory $responseFactory): Dispatcher {
         $this->responseFactory = $responseFactory;
 
         return $this;
     }
-
-
 }
