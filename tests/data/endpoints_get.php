@@ -6,7 +6,19 @@
  */ 
 
 return [
+  'app\controller\Main6547586Ctl' => [
+    'index' => [
+      'methodName' => 'actionIndex',
+      'paramsMeta' => [
+      ],
+    ],
+  ],
   'app\controller\Test6547586Ctl' => [
+    'index' => [
+      'methodName' => 'actionIndex',
+      'paramsMeta' => [
+      ],
+    ],
     'get' => [
       'methodName' => 'actionGet',
       'paramsMeta' => [
@@ -73,10 +85,5 @@ return [
         ],
       ],
     ],
-    'index' => [
-        'methodName' => 'actionIndex',
-        'paramsMeta' => [
-        ],
-    ],
-  ]
+  ],
 ];

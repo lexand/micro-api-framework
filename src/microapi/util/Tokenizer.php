@@ -15,15 +15,21 @@ class Tokenizer {
 
     /**
      * Tokenizer constructor.
+     *
      * @param string $src
      * @param string $delimiter
      * @param int    $skip
      */
     public function __construct(string $src, string $delimiter, int $skip) {
         $src = trim($src, $delimiter);
-        $data = array_map('trim', explode($delimiter, $src));
-        $data = array_slice($data, $skip);
-        $this->data = $data;
+        if ($src === '') {
+            $this->data = [];
+        }
+        else {
+            $data       = array_map('trim', explode($delimiter, $src));
+            $data       = array_slice($data, $skip);
+            $this->data = $data;
+        }
     }
 
     /**

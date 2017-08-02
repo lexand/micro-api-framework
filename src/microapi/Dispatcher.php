@@ -70,6 +70,11 @@ class Dispatcher implements EventDriven {
     private $responseFactory;
 
     /**
+     * @var string[]
+     */
+    private $defaultControllers;
+
+    /**
      * App constructor.
      *
      * @throws \LogicException
@@ -88,10 +93,15 @@ class Dispatcher implements EventDriven {
      *
      * @param string $module module name
      * @param string $ns     module namespace.
+     * @param string $defaultController
      * @return $this
      */
-    public function addModule(string $module, string $ns) {
+    public function addModule(string $module, string $ns, string $defaultController = null) {
         $this->modulesNamespaces[$module] = $ns;
+
+        if (!empty($defaultController)) {
+            $this->defaultControllers[$module] = $defaultController;
+        }
 
         return $this;
     }
@@ -101,10 +111,11 @@ class Dispatcher implements EventDriven {
      * - all controllers should placed under \&lt;module_namespace&gt;\controller namespace
      *
      * @param string $ns
+     * @param string $defaultController
      * @return $this
      */
-    public function addDefaultModule(string $ns) {
-        $this->modulesNamespaces['__default'] = $ns;
+    public function addDefaultModule(string $ns, string $defaultController = null) {
+        $this->addModule('__default', $ns, $defaultController);
 
         return $this;
     }
@@ -241,13 +252,17 @@ class Dispatcher implements EventDriven {
      */
     public function getEndpoint(Tokenizer $tokenizer, ServerRequestInterface $request) {
         // module or controller name
-        $part = $tokenizer->next();
-        if (isset($this->modulesNamespaces[$part])) {
-            $ctlName = $tokenizer->next();
-            $fqcnCtl = $this->modulesNamespaces[$part] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
+        $module = $tokenizer->next();
+        if ($module !== null) {
+            if (isset($this->modulesNamespaces[$module])) {
+                $fqcnCtl = $this->ctlFqcn($module, $tokenizer->next());
+            }
+            else {
+                $fqcnCtl = $this->ctlFqcn('__default', $module);
+            }
         }
         else {
-            $fqcnCtl = $this->modulesNamespaces['__default'] . '\controller\\' . ucfirst($part) . 'Ctl';
+            $fqcnCtl = $this->ctlFqcn('__default');
         }
 
         $actionName = $tokenizer->next();
@@ -386,5 +401,22 @@ class Dispatcher implements EventDriven {
         $this->responseFactory = $responseFactory;
 
         return $this;
+    }
+
+    /**
+     * @param string      $module
+     * @param string|null $ctlName
+     * @return string
+     * @throws \LogicException
+     */
+    public function ctlFqcn(string $module, string $ctlName = null): string {
+        if ($ctlName === null) {
+            if (!isset($this->defaultControllers[$module])) {
+                throw new \LogicException("You request default controller from '{$module}' but default controller not specified");
+            }
+            $ctlName = ucfirst($this->defaultControllers[$module]);
+        }
+
+        return $this->modulesNamespaces[$module] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
     }
 }

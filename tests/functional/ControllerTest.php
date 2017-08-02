@@ -192,13 +192,20 @@ class ControllerTest extends TestCase {
         static::assertEquals($age, $response['dto']['age']);
     }
 
+    public function testDefaultController() {
+        $port = TestServer::PORT;
+
+        $endPoint = "http://localhost:{$port}/";
+
+        static::assertEquals((new \app\controller\Main6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
+    }
+
     public function testIndex() {
         $port = TestServer::PORT;
 
         $endPoint = "http://localhost:{$port}/test6547586";
 
         static::assertEquals((new \app\controller\Test6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
-
     }
 
     public function testIndexAdminModule() {

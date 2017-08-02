@@ -105,6 +105,16 @@ return [
                         ],
 
                 ],
+            'app\\controller\\Main6547586Ctl' =>
+                [
+                    'index'              =>
+                        [
+                            'methodName' => 'actionIndex',
+                            'paramsMeta' =>
+                                [
+                                ],
+                        ],
+                ]
         ],
     'post' =>
         [

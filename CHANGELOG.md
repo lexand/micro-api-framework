@@ -1,3 +1,8 @@
+#0.0.29-alpha
+- default module controller (accessible via /)
+- default controller action (index) (accessible via /\[module/\]controller or /\[module/\]controller/index)
+- tests for modules/default controller/default actions
+
 #0.0.26-alpha
 - added DefaultResponseFactory. Should minimize calling of the clone() in \Psr\Http\Message\ResponseInterface::with* methods
 - added examples for microapi-framework usage in tests/functional/router.php 

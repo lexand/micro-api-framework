@@ -22,6 +22,7 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
 
 
 require_once __DIR__ . '/../classes/app/controller/Test6547586Ctl.php';
+require_once __DIR__ . '/../classes/app/controller/Main6547586Ctl.php';
 require_once __DIR__ . '/../classes/admin/controller/Test6547586Ctl.php';
 require_once __DIR__ . '/../classes/dto/TestDTO.php';
 
@@ -29,7 +30,7 @@ require_once __DIR__ . '/../classes/dto/TestDTO.php';
 
 \microapi\Dispatcher::get()
                     ->addModule('admin', '\admin')
-                    ->addDefaultModule('\app')
+                    ->addDefaultModule('\app', 'main6547586')
                     ->setResponseFactory(
                         new \microapi\http\DefaultResponseFactory(
                             200,
