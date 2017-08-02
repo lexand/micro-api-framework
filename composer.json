@@ -22,7 +22,7 @@
       "tests\\utils\\": "tests/utils"
     },
     "files": [
-      "src/microapi/message_funcs.php"
+      "src/microapi/functions_include.php"
     ]
   },
   "require": {

@@ -22,6 +22,7 @@ use microapi\event\EventDriven;
 use microapi\event\Events;
 use microapi\event\object\AfterDispatch;
 use microapi\event\object\BeforeDispatch;
+use microapi\http\DefaultResponseFactory;
 use microapi\http\HttpException;
 use microapi\http\WrappedResponse;
 use microapi\util\Tokenizer;
@@ -62,6 +63,11 @@ class Dispatcher implements EventDriven {
      * @var DtoFactory
      */
     private $dtoFactory;
+
+    /**
+     * @var \microapi\http\ResponseFactory
+     */
+    private $responseFactory;
 
     /**
      * App constructor.
@@ -171,7 +177,10 @@ class Dispatcher implements EventDriven {
 
             $params = $this->extractEndpointParams($tokenizer, $request->getBody(), $endpoint);
 
-            $this->afterDispatch($endpoint->invoke($params));
+            $this->afterDispatch($endpoint->invoke(
+                $this->getResponseFactory()->create(),
+                $params
+            ));
         }
         catch (\Throwable $t) {
             $this->afterDispatch(new WrappedResponse($request, $t));
@@ -351,4 +360,27 @@ class Dispatcher implements EventDriven {
 
         return $this;
     }
+
+    /**
+     * @return \microapi\http\ResponseFactory
+     */
+    public function getResponseFactory(): \microapi\http\ResponseFactory {
+        if ($this->responseFactory === null) {
+            $this->responseFactory = new DefaultResponseFactory();
+        }
+
+        return $this->responseFactory;
+    }
+
+    /**
+     * @param \microapi\http\ResponseFactory $responseFactory
+     * @return static
+     */
+    public function setResponseFactory(\microapi\http\ResponseFactory $responseFactory) : Dispatcher{
+        $this->responseFactory = $responseFactory;
+
+        return $this;
+    }
+
+
 }

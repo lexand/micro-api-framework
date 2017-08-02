@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
-use GuzzleHttp\Psr7\Response;
 use microapi\Controller;
 use microapi\http\WrappedResponse;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Endpoint {
@@ -65,12 +65,13 @@ class Endpoint {
      * - call beforeAction/action/afterAction
      * - combine action result, initial request and response into \microapi\http\WrappedResponse
      *
-     * @param array $params
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @param array                               $params
      * @return \microapi\http\WrappedResponse
      */
-    public function invoke(array $params = []): WrappedResponse {
+    public function invoke(ResponseInterface $response, array $params = []): WrappedResponse {
         $this->controller->setRequest($this->request);
-        $this->controller->setResponse(new Response());
+        $this->controller->setResponse($response);
 
         $this->controller->beforeAction($this->getActionName(), $params);
 

@@ -20,15 +20,21 @@ trait Events {
      *
      * @param string     $event
      * @param callable[] $f
+     * @param bool       $after add handlers after all or before all previous handlers
      * @return static
      */
-    public function on(string $event, array $f){
+    public function on(string $event, array $f, bool $after = true) {
 
         $event = strtolower($event);
 
         foreach ($f as $_f) {
             if (is_callable($_f)) {
-                $this->_e[$event][] = $_f;
+                if ($after) {
+                    $this->_e[$event][] = $_f;
+                }
+                else{
+                    array_unshift($this->_e[$event], $_f);
+                }
             }
         }
 
