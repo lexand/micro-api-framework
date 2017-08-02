@@ -180,7 +180,7 @@ __HDR__;
         foreach ($this->modulesNamespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
                 $pathLen  = strlen($path);
-                $realPath = $path . '/' . str_replace('\\', '/', $nsPrefix);
+                $realPath = $path . '/' . str_replace('\\', '/', $nsPrefix) . '/controller';
                 $di       = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($realPath));
                 /** @var \SplFileInfo $fi */
                 foreach ($di as $fi) {
