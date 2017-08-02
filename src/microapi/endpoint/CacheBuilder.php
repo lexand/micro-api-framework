@@ -104,7 +104,7 @@ class CacheBuilder {
                     fwrite($fh, sprintf("%s],\n", $pl3));
                     fwrite($fh, sprintf("%s],\n", $pl2));
                 }
-                fwrite($fh, sprintf("%s]\n", $pl1));
+                fwrite($fh, sprintf("%s],\n", $pl1));
             }
 
             fwrite($fh, "];\n");

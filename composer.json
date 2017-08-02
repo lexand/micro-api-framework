@@ -12,9 +12,6 @@
   ],
   "autoload": {
     "psr-4": {
-      "app\\": [
-        "tests/functional/app/"
-      ],
       "microapi\\": [
         "src/microapi/",
         "tests/units/microapi/"

@@ -8,13 +8,26 @@
 
 namespace microapi;
 
+use app\controller\Adminest6547586Ctl;
 use app\controller\Test6547586Ctl;
 use GuzzleHttp\Psr7\ServerRequest;
 use microapi\event\Event;
+use microapi\http\DefaultResponseFactory;
 use microapi\util\Tokenizer;
 use PHPUnit\Framework\TestCase;
 
 class DispatcherTest extends TestCase {
+
+    /**
+     * @var \microapi\http\ResponseFactory
+     */
+    private static $drf;
+
+    public static function setUpBeforeClass() {
+        parent::setUpBeforeClass();
+
+        static::$drf = new DefaultResponseFactory();
+    }
 
     public function testGetEndpointFromCache() {
 
@@ -28,7 +41,7 @@ class DispatcherTest extends TestCase {
 
         self::assertNotNull($end);
 
-        $res = $end->invoke();
+        $res = $end->invoke(static::$drf->create());
         static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 
@@ -42,7 +55,7 @@ class DispatcherTest extends TestCase {
 
         self::assertNotNull($end);
 
-        $res = $end->invoke();
+        $res = $end->invoke(static::$drf->create());
         static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 
@@ -63,7 +76,7 @@ class DispatcherTest extends TestCase {
 
         self::assertNotNull($end);
 
-        $res = $end->invoke();
+        $res = $end->invoke(static::$drf->create());
         static::assertEquals((new Test6547586Ctl())->actionGet(), $res->data);
     }
 

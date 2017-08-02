@@ -7,26 +7,6 @@
 
 return [
   'app\controller\Test6547586Ctl' => [
-    'get' => [
-      'methodName' => 'actionGet',
-      'paramsMeta' => [
-      ],
-    ],
-    'getparametrized' => [
-      'methodName' => 'actionGetparametrized',
-      'paramsMeta' => [
-        'name' => [
-          'optional' => false,
-          'type' => 'string',
-          'builtin' => true,
-        ],
-        'age' => [
-          'optional' => false,
-          'type' => 'int',
-          'builtin' => true,
-        ],
-      ],
-    ],
     'postparametrized' => [
       'methodName' => 'actionPostparametrized',
       'paramsMeta' => [
@@ -62,6 +42,21 @@ return [
         ],
       ],
     ],
+    'postmixedargs' => [
+      'methodName' => 'actionPostmixedargs',
+      'paramsMeta' => [
+        'c' => [
+          'optional' => false,
+          'type' => 'string',
+          'builtin' => true,
+        ],
+        'dto' => [
+          'optional' => false,
+          'builtin' => false,
+          'type' => 'app\dto\TestDTO',
+        ],
+      ],
+    ],
     'checkconst' => [
       'methodName' => 'actionCheckconst',
       'paramsMeta' => [
@@ -73,10 +68,5 @@ return [
         ],
       ],
     ],
-    'index' => [
-        'methodName' => 'actionIndex',
-        'paramsMeta' => [
-        ],
-    ],
-  ]
+  ],
 ];

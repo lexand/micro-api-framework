@@ -7,6 +7,11 @@
 
 return [
   'app\controller\Test6547586Ctl' => [
+    'index' => [
+      'methodName' => 'actionIndex',
+      'paramsMeta' => [
+      ],
+    ],
     'get' => [
       'methodName' => 'actionGet',
       'paramsMeta' => [
@@ -73,10 +78,12 @@ return [
         ],
       ],
     ],
+  ],
+  'admin\controller\Test6547586Ctl' => [
     'index' => [
-        'methodName' => 'actionIndex',
-        'paramsMeta' => [
-        ],
+      'methodName' => 'actionIndex',
+      'paramsMeta' => [
+      ],
     ],
-  ]
+  ],
 ];

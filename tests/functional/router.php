@@ -20,9 +20,15 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
     return false;
 }
 
+
+require_once __DIR__ . '/../classes/app/controller/Test6547586Ctl.php';
+require_once __DIR__ . '/../classes/admin/controller/Test6547586Ctl.php';
+require_once __DIR__ . '/../classes/dto/TestDTO.php';
+
 // here is example of the microapi-framework usage
 
 \microapi\Dispatcher::get()
+                    ->addModule('admin', '\admin')
                     ->addDefaultModule('\app')
                     ->setResponseFactory(
                         new \microapi\http\DefaultResponseFactory(
@@ -44,7 +50,7 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
                                     }
                                     $e->wr->response = $e->wr->response->withStatus($code, $reason);
                                     // or you can render pretty html for Content-Type: text/html and for debug mode
-                                    $e->wr->data     = [
+                                    $e->wr->data = [
                                         'error' => true,
                                         'msg'   => $e->wr->data->getMessage()
                                     ];
@@ -76,7 +82,7 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"])) {
                                     }
 
                                     $e->wr->response = $r->withBody($body);
-                                    $e->wr->data = null;
+                                    $e->wr->data     = null;
                                 }
 
                                 return $e;

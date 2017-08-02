@@ -96,6 +96,14 @@ return [
                                         ],
                                 ],
                         ],
+                    'index'              =>
+                        [
+                            'methodName' => 'actionIndex',
+                            'paramsMeta' =>
+                                [
+                                ],
+                        ],
+
                 ],
         ],
     'post' =>

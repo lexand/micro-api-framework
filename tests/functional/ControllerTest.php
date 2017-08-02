@@ -6,8 +6,6 @@
  * Time: 14:14
  */
 
-namespace app\controller;
-
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
 use tests\utils\TestServer;
@@ -20,6 +18,7 @@ class ControllerTest extends TestCase {
 
     public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
+
         static::$client = new Client();
         TestServer::start();
     }
@@ -198,7 +197,17 @@ class ControllerTest extends TestCase {
 
         $endPoint = "http://localhost:{$port}/test6547586";
 
-        static::assertEquals((new Test6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
+        static::assertEquals((new \app\controller\Test6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
 
     }
+
+    public function testIndexAdminModule() {
+        $port = TestServer::PORT;
+
+        $endPoint = "http://localhost:{$port}/admin/test6547586";
+
+        static::assertEquals((new \admin\controller\Test6547586Ctl())->actionIndex(), $this->doRequest('get', $endPoint));
+
+    }
+
 }
