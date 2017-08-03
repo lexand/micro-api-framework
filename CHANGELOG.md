@@ -1,6 +1,6 @@
 #0.0.29-alpha
 - default module controller (accessible via /)
-- default controller action (index) (accessible via URL path /\[module/\]controller or /\[module/\]controller/index)
+- default controller action (index) (accessible via URL path /\[module/\]controller)
 - tests for modules/default controller/default actions
 
 #0.0.26-alpha

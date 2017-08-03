@@ -32,8 +32,8 @@ shooting yourself in the foot, hand, eyes, head etc. you can freely modifier the
 ```php
 \microapi\Dispatcher::get()
                     ->addModule('admin', '\admin', main)
-                    ->addDefaultModule('\app', 'main');
-                    ...
+                    ->addDefaultModule('\app', 'main')
+                    ->dispatch();
 
 namespace app\controller {
   class MainCtl extends \microapi\Controller {
@@ -78,11 +78,9 @@ And now we have
 | URL path| action method |
 | --- | --- |
 |/ | \app\controller\MainCtl::actionIndex()|
-|/index | \app\controller\MainCtl::actionIndex()|
 |/profile | \app\controller\ProfileCtl::actionIndex()|
 |/profile/update | \app\controller\ProfileCtl::actionUpdate()|
 |/admin | \app\admin\controller\MainCtl::actionIndex()|
-|/admin/index | \app\admin\controller\MainCtl::actionIndex()|
 |/admin/user | \app\admin\controller\UserCtl::actionIndex()|
 |/admin/user/create | \app\admin\controller\UserCtl::actionCreate()|
 
