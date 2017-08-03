@@ -75,6 +75,7 @@ namespace app\admin\controller {
 ```
 And now we have
 | URL path| action method |
+| --- | --- |
 |/ | \app\controller\MainCtl::actionIndex()|
 |/index | \app\controller\MainCtl::actionIndex()|
 |/profile | \app\controller\ProfileCtl::actionIndex()|
