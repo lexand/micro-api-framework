@@ -74,6 +74,7 @@ namespace app\admin\controller {
 
 ```
 And now we have
+
 | URL path| action method |
 | --- | --- |
 |/ | \app\controller\MainCtl::actionIndex()|
