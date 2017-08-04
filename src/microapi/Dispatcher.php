@@ -88,7 +88,7 @@ class Dispatcher implements EventDriven {
             throw new \LogicException('only one instance allowed');
         }
 
-        if($request === null){
+        if ($request === null) {
             $request = ServerRequest::fromGlobals();
         }
         $this->request = $request;
@@ -271,10 +271,7 @@ class Dispatcher implements EventDriven {
             $fqcnCtl = $this->ctlFqcn('__default');
         }
 
-        $actionName = $tokenizer->next();
-        if ($actionName === null) {
-            $actionName = 'index';
-        }
+        $actionName = $tokenizer->next() ?? 'index';
 
         $endpoint = $this->getEndpointFromCache($request, $fqcnCtl, $actionName);
         if ($endpoint === null) {
