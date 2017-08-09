@@ -14,11 +14,13 @@ class TestDTO extends DTO{
 
     /**
      * @var string
+     * @exposed
      */
     public $name;
 
     /**
      * @var int
+     * @exposed
      */
     public $age;
 }

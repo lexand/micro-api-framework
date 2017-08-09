@@ -16,7 +16,7 @@ class CacheBuilderTest extends TestCase {
     public function testExtractData() {
         $cb = new CacheBuilder();
 
-        $cb->setCachePath(TESTS_ROOT . '/units/microapi/endpoint')
+        $cb->setCachePath(TESTS_ROOT . '/units/endpoint')
            ->addModulesNamespace('app', [TESTS_ROOT . '/classes']);
 
         $res = $cb->extractData();
@@ -25,7 +25,7 @@ class CacheBuilderTest extends TestCase {
     }
 
     public function testBuild() {
-        $path = TESTS_ROOT . '/units/microapi/endpoint';
+        $path = TESTS_ROOT . '/units/endpoint';
 
         $cb = new CacheBuilder();
 
@@ -43,7 +43,7 @@ class CacheBuilderTest extends TestCase {
     }
 
     public function testBuildWithModules() {
-        $path = TESTS_ROOT . '/units/microapi/endpoint';
+        $path = TESTS_ROOT . '/units/endpoint';
 
         $cb = new CacheBuilder();
 

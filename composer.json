@@ -13,13 +13,13 @@
   "autoload": {
     "psr-4": {
       "microapi\\": [
-        "src/microapi/",
-        "tests/units/microapi/"
+        "src/",
+        "tests/units/"
       ],
       "tests\\utils\\": "tests/utils"
     },
     "files": [
-      "src/microapi/functions_include.php"
+      "src/functions_include.php"
     ]
   },
   "require": {

@@ -364,7 +364,7 @@ class Dispatcher implements EventDriven {
                 }
             }
             else {
-                $params[$paramName] = $this->dtoFactory()->create($meta['type'], $stream);
+                $params[$paramName] = $this->dtoFactory()->createFromStream($meta['type'], $stream);
             }
         }
 
