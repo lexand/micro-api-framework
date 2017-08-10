@@ -12,6 +12,21 @@ namespace microapi\dto;
 
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Class DtoFactoryDefault
+ *
+ * DTO objects should accept next conventions
+ *
+ * - such fields should annotated with its type (builtin or class) and @exposed. Fields with @exposed and without type
+ * will throw exception DtoFieldExposingException. Fields without @exposed will be meant as auxiliary.
+ * - DTO class supports nesting of DTO and general objects. Nested DTO objects will instantiated with the same
+ * DtoFactory. General objects will be created as "new $class($rawData)"
+ * - DTO supports fields with arrayed type (array od scalars/objects)
+ *
+ *
+ * @package microapi\dto
+ * @see \microapi\dto\DTO
+ */
 class DtoFactoryDefault implements DtoFactory {
 
     private static $buildInTypes = [
@@ -27,10 +42,10 @@ class DtoFactoryDefault implements DtoFactory {
     public function createFromStream(string $class, StreamInterface $stream): DTO {
         $fields = json_decode($stream->getContents(), true);
 
-        return $this->createFromAssoc($class, $fields);
+        return $this->createFromData($class, $fields);
     }
 
-    public function createFromAssoc(string $class, array $fields): DTO {
+    public function createFromData(string $class, array $fields): DTO {
 
         $obj = new $class();
 
@@ -164,12 +179,12 @@ class DtoFactoryDefault implements DtoFactory {
         if ($isArray) {
             $res = [];
             foreach ($value as $item) {
-                $res[] = $this->createFromAssoc($class, $item);
+                $res[] = $this->createFromData($class, $item);
             }
             $obj->{$field} = $res;
         }
         else {
-            $obj->{$field} = $this->createFromAssoc($class, $value);
+            $obj->{$field} = $this->createFromData($class, $value);
         }
     }
 

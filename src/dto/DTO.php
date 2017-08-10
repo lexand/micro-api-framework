@@ -15,14 +15,9 @@ namespace microapi\dto;
  *
  * But here is introduced next convention:
  *
- * All fields which will be filled from $fields _constructor argument
+ * All fields which will be filled from RAW POST JSON
  * - should be public
  * - almost read-only (only if you want predictable behavior). You should accept and support this freedom by yourself.
- * - such fields should annotated with its type (builtin or class) and @exposed. Fields with @exposed and without type
- * will throw exception DtoFieldExposingException. Fields without @exposed will be meant as auxiliary.
- * - DTO class supports nesting of DTO and general objects. Nested DTO objects will instantiated with the same
- * DtoFactory. General objects will be created as "new $class($rawData)"
- * - DTO supports fields with arrayed type (array od scalars/objects)
  *
  * Class DTO
  *

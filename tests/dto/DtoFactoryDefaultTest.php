@@ -200,7 +200,7 @@ __DOCS__;
 
         $df = new DtoFactoryDefault();
 
-        $df->createFromAssoc(\microapi\dto\A::class, ['exposedWithoutType' => 123]);
+        $df->createFromData(\microapi\dto\A::class, ['exposedWithoutType' => 123]);
     }
 
     public function testFillScalar() {
@@ -214,7 +214,7 @@ __DOCS__;
             'd' => 123.456,
             'b' => true
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         foreach ($fields as $name => $value) {
@@ -233,7 +233,7 @@ __DOCS__;
             'dArr' => [123.456],
             'bArr' => [true]
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         foreach ($fields as $name => $value) {
@@ -256,7 +256,7 @@ __DOCS__;
             //'d' => 123.456,
             //'b' => true
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         foreach ($fields as $name => $value) {
@@ -270,7 +270,7 @@ __DOCS__;
         $fields = [
             'dto' => ['a' => 'string'],
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         /** @var \microapi\dto\A $obj */
@@ -284,7 +284,7 @@ __DOCS__;
         $fields = [
             'dtoArr' => [['a' => 'string']],
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         /** @var \microapi\dto\A $obj */
@@ -299,7 +299,7 @@ __DOCS__;
         $fields = [
             'point' => ['x' => 1, 'y' => 2],
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         /** @var \microapi\dto\A $obj */
@@ -314,7 +314,7 @@ __DOCS__;
         $fields = [
             'points' => [['x' => 1, 'y' => 2]],
         ];
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertInstanceOf(A::class, $obj);
         /** @var \microapi\dto\A $obj */
@@ -332,7 +332,7 @@ __DOCS__;
         ];
 
         /** @var \microapi\dto\A $obj */
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertEquals(A::VALUE, $obj->notExposed);
     }
@@ -345,7 +345,7 @@ __DOCS__;
         ];
 
         /** @var \microapi\dto\A $obj */
-        $obj    = $df->createFromAssoc(\microapi\dto\A::class, $fields);
+        $obj    = $df->createFromData(\microapi\dto\A::class, $fields);
 
         self::assertEquals(A::VALUE, $obj->exposedWithDefault);
     }
