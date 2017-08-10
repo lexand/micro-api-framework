@@ -9,6 +9,6 @@ declare(strict_types=1);
 
 namespace microapi\dto;
 
-class DtoCacheBuilder {
+class CacheBuilder {
 
 }

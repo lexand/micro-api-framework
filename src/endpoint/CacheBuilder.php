@@ -51,7 +51,7 @@ class CacheBuilder {
      * @param array  $path
      * @return $this
      */
-    public function addModulesNamespace(string $nsPrefix, array $path) {
+    public function addModulesNamespace(string $nsPrefix, array $path): CacheBuilder {
         $this->modulesNamespaces[$nsPrefix] = $path;
 
         return $this;
