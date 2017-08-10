@@ -220,6 +220,8 @@ class DtoFactoryDefault implements DtoFactory {
      * @param array             $fields
      * @param                   $meta
      * @param                   $name
+     * @throws \microapi\dto\DtoFieldTypeMismatched
+     * @throws \microapi\dto\DtoFieldExposingException
      */
     public function fillFeild(DTO $obj, array $fields, $meta, $name) {
         if ($meta['type'] === null) {
