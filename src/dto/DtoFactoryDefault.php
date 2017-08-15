@@ -25,9 +25,10 @@ use Psr\Http\Message\StreamInterface;
  *
  *
  * @package microapi\dto
- * @see \microapi\dto\DTO
+ * @see     \microapi\dto\DTO
  */
 class DtoFactoryDefault implements DtoFactory {
+
 
     private static $buildInTypes = [
         'int'     => 1,
@@ -38,6 +39,13 @@ class DtoFactoryDefault implements DtoFactory {
         'bool'    => 1,
         'boolean' => 1,
     ];
+
+    private $_c = [];
+
+    /**
+     * @var string
+     */
+    private $cachePath;
 
     public function createFromStream(string $class, StreamInterface $stream): DTO {
         $fields = json_decode($stream->getContents(), true);
@@ -79,7 +87,7 @@ class DtoFactoryDefault implements DtoFactory {
                     continue;
                 }
 
-                $this->fillFeild($obj, $fields, $meta, $name);
+                $this->fillField($obj, $fields, $meta, $name);
             }
         }
     }
@@ -126,14 +134,37 @@ class DtoFactoryDefault implements DtoFactory {
     public function fillObjViaMeta(DTO $obj, array $fields, array $fieldsMeta) {
         foreach ($fieldsMeta as $name => $meta) {
             if (isset($fields[$name])) {
-                $this->fillFeild($obj, $fields, $meta, $name);
+                $this->fillField($obj, $fields, $meta, $name);
             }
         }
     }
 
+    /**
+     * @param string $class
+     * @return array
+     * @see \microapi\dto\CacheBuilder for details
+     */
     public function metaFor(string $class) {
-        // todo: read from cache
-        return [];
+        if (!isset($this->_c[$class])) {
+
+            $file = $this->cachePath . '/';
+            $file .= str_replace('\\', '_', trim($class, '\\')) . '.php';
+
+            if (file_exists($file)) {
+                $this->_c[$class] = require $file;
+            }
+            else {
+                $this->_c[$class] = [];
+            }
+        }
+
+        return $this->_c[$class];
+    }
+
+    public function setCachePath(string $path): DtoFactoryDefault {
+        $this->cachePath = $path;
+
+        return $this;
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
@@ -223,7 +254,7 @@ class DtoFactoryDefault implements DtoFactory {
      * @throws \microapi\dto\DtoFieldTypeMismatched
      * @throws \microapi\dto\DtoFieldExposingException
      */
-    public function fillFeild(DTO $obj, array $fields, $meta, $name) {
+    public function fillField(DTO $obj, array $fields, $meta, $name) {
         if ($meta['type'] === null) {
             $class = get_class($obj);
             throw new DtoFieldExposingException("In class '{$class}', field '{$name}' annotated as @exposed but type is not specified");
