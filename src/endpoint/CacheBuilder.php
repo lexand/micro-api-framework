@@ -35,14 +35,17 @@ class CacheBuilder {
     private $modulesNamespaces = [];
 
     /**
+     * CacheBuilder constructor.
+     *
+     * @param string $cachePath Path where cache filed will be stored.
+     */
+    public function __construct(string $cachePath) { $this->cachePath = $cachePath; }
+
+    /**
      * @param string $cachePath Path where cache filed will be stored.
      * @return \microapi\endpoint\CacheBuilder
      */
-    public function setCachePath(string $cachePath): CacheBuilder {
-        $this->cachePath = $cachePath;
-
-        return $this;
-    }
+    public static function create(string $cachePath): CacheBuilder { return new self($cachePath); }
 
     /**
      * all controllers should extends \microapi\Controller
@@ -194,10 +197,12 @@ __HDR__;
                         $fqcn = str_replace('/', '\\', substr($pathName, $pathLen, -4));
 
                         $ctlReflection = new \ReflectionClass($fqcn);
-                        $methods       = $ctlReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-                        foreach ($methods as $method) {
-                            if (substr($method->getName(), 0, 6) === 'action') {
-                                $this->addToCache($rawCache, $method);
+                        if ($ctlReflection->isInstantiable()) {
+                            $methods = $ctlReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+                            foreach ($methods as $method) {
+                                if (substr($method->getName(), 0, 6) === 'action') {
+                                    $this->addToCache($rawCache, $method);
+                                }
                             }
                         }
                     }
