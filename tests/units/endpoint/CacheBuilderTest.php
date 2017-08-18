@@ -15,7 +15,7 @@ class CacheBuilderTest extends TestCase {
 
     public function testExtractData() {
         $cb = CacheBuilder::create(TESTS_ROOT . '/units/endpoint')
-                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes']);
+                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes/app']);
 
         $res = $cb->extractData();
 
@@ -26,7 +26,7 @@ class CacheBuilderTest extends TestCase {
         $path = TESTS_ROOT . '/units/endpoint';
 
         $cb = CacheBuilder::create($path)
-                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes']);
+                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes/app']);
 
         $cb->build();
 
@@ -42,8 +42,8 @@ class CacheBuilderTest extends TestCase {
         $path = TESTS_ROOT . '/units/endpoint';
 
         $cb = CacheBuilder::create($path)
-                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes'])
-                          ->addModulesNamespace('admin', [TESTS_ROOT . '/classes']);
+                          ->addModulesNamespace('app', [TESTS_ROOT . '/classes/app'])
+                          ->addModulesNamespace('admin', [TESTS_ROOT . '/classes/admin']);
 
         $cb->build();
 

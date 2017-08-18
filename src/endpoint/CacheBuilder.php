@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace microapi\endpoint;
 
+use microapi\Controller;
+
 /**
  * Class CacheBuilder
  *
@@ -32,7 +34,7 @@ class CacheBuilder {
      */
     private $cachePath;
 
-    private $modulesNamespaces = [];
+    private $namespaces = [];
 
     /**
      * CacheBuilder constructor.
@@ -50,12 +52,16 @@ class CacheBuilder {
     /**
      * all controllers should extends \microapi\Controller
      *
+     * - namaspaces should not intersect
+     * - if you have classes in \one\two namespace, and in \one\two\three namespace? add only top level NS : \one\two
+     *
      * @param string $nsPrefix without leading and trailing slashes
      * @param array  $path
      * @return $this
      */
     public function addModulesNamespace(string $nsPrefix, array $path): CacheBuilder {
-        $this->modulesNamespaces[$nsPrefix] = $path;
+        $nsPrefix                    = trim($nsPrefix, '\\');
+        $this->namespaces[$nsPrefix] = $path;
 
         return $this;
     }
@@ -180,11 +186,12 @@ __HDR__;
     public function extractData(): array {
         $rawCache = [];
 
-        foreach ($this->modulesNamespaces as $nsPrefix => $paths) {
+        $processed = [];
+
+        foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
-                $pathLen  = strlen($path);
-                $realPath = $path . '/' . str_replace('\\', '/', $nsPrefix) . '/controller';
-                $di       = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($realPath));
+                $pathLen = strlen($path) + 1;
+                $di      = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
                 /** @var \SplFileInfo $fi */
                 foreach ($di as $fi) {
                     if ($fi->isDir()) {
@@ -192,14 +199,20 @@ __HDR__;
                     }
                     $pathName = $fi->getPathname();
 
-                    if (substr($pathName, strlen($pathName) - 7) === 'Ctl.php') {
+                    if (substr($pathName, -7) === 'Ctl.php') {
 
-                        $fqcn = str_replace('/', '\\', substr($pathName, $pathLen, -4));
+                        $fqcn = $nsPrefix . '\\' . str_replace('/', '\\', substr($pathName, $pathLen, -4));
 
                         try {
-                            $ctlReflection = new \ReflectionClass($fqcn);
-                            if ($ctlReflection->isInstantiable()) {
-                                $methods = $ctlReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+                            $r = new \ReflectionClass($fqcn);
+                            if (
+                                !isset($processed[$fqcn])
+                                && $r->isInstantiable()
+                                && $r->isSubclassOf(Controller::class)
+                            ) {
+                                $processed[$fqcn] = 1;
+
+                                $methods = $r->getMethods(\ReflectionMethod::IS_PUBLIC);
                                 foreach ($methods as $method) {
                                     if (substr($method->getName(), 0, 6) === 'action') {
                                         $this->addToCache($rawCache, $method);
@@ -207,7 +220,7 @@ __HDR__;
                                 }
                             }
                         }
-                        catch (\Throwable $ignored) {
+                        catch (\ReflectionException $ignored) {
                         }
                     }
                 }

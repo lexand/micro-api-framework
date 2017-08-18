@@ -24,14 +24,26 @@ class CacheBuilder {
 
     public static function create(string $path): CacheBuilder { return new self($path); }
 
-    public function addNamespace(string $ns, array $paths): CacheBuilder {
-        $ns                    = trim($ns, '\\');
-        $this->namespaces[$ns] = $paths;
+    /**
+     *
+     * - namaspaces should not intersect
+     * - if you have classes in \one\two namespace, and in \one\two\three namespace? add only top level NS : \one\two
+     *
+     * @param string $nsPrefix
+     * @param array  $paths
+     * @return \microapi\dto\CacheBuilder
+     */
+    public function addNamespace(string $nsPrefix, array $paths): CacheBuilder {
+        $nsPrefix                    = trim($nsPrefix, '\\');
+        $this->namespaces[$nsPrefix] = $paths;
 
         return $this;
     }
 
     public function build() {
+
+        $processed = [];
+
         foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
                 $pathLen = strlen($path) + 1;
@@ -51,7 +63,13 @@ class CacheBuilder {
                         try {
                             $r = new \ReflectionClass($fqcn);
                             // info : filter by name space \ReflectionClass::getNamespaceName VS $nsPrefix
-                            if ($r->isInstantiable() && $r->isSubclassOf(DTO::class)) {
+                            if (
+                                !isset($processed[$fqcn])
+                                && $r->isInstantiable()
+                                && $r->isSubclassOf(DTO::class)
+                            ) {
+
+                                $processed[$fqcn] = 1;
 
                                 $propsMeta = [];
 
@@ -69,7 +87,7 @@ class CacheBuilder {
                                 $this->saveCache($fqcn, $propsMeta);
                             }
                         }
-                        catch (\Throwable $ignored){
+                        catch (\ReflectionException $ignored) {
 
                         }
                     }
