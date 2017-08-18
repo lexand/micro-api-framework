@@ -25,6 +25,7 @@ class CacheBuilder {
     public static function create(string $path): CacheBuilder { return new self($path); }
 
     public function addNamespace(string $ns, array $paths): CacheBuilder {
+        $ns                    = trim($ns, '\\');
         $this->namespaces[$ns] = $paths;
 
         return $this;
@@ -33,37 +34,43 @@ class CacheBuilder {
     public function build() {
         foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
-                $pathLen  = strlen($path);
-                $realPath = $path . '/' . str_replace('\\', '/', $nsPrefix) . '/controller';
-                $di       = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($realPath));
+                $pathLen = strlen($path) + 1;
+                $di      = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
 
+                /** @var \SplFileInfo $fi */
                 foreach ($di as $fi) {
                     if ($fi->isDir()) {
                         continue;
                     }
                     $pathName = $fi->getPathname();
 
-                    if (substr($pathName, strlen($pathName) - 7) === 'Ctl.php') {
+                    if ($fi->getExtension() === 'php') {
 
-                        $fqcn = str_replace('/', '\\', substr($pathName, $pathLen, -4));
+                        $fqcn = $nsPrefix . '\\' . str_replace('/', '\\', substr($pathName, $pathLen, -4));
 
-                        $r = new \ReflectionClass($fqcn);
-                        if ($r->isInstantiable()) {
+                        try {
+                            $r = new \ReflectionClass($fqcn);
+                            // info : filter by name space \ReflectionClass::getNamespaceName VS $nsPrefix
+                            if ($r->isInstantiable() && $r->isSubclassOf(DTO::class)) {
 
-                            $propsMeta = [];
+                                $propsMeta = [];
 
-                            $props = $r->getProperties(\ReflectionProperty::IS_PUBLIC);
-                            foreach ($props as $prop) {
-                                $name = $prop->getName();
-                                $meta = self::annotatedMeta($prop->getDocComment());
+                                $props = $r->getProperties(\ReflectionProperty::IS_PUBLIC);
+                                foreach ($props as $prop) {
+                                    $name = $prop->getName();
+                                    $meta = self::annotatedMeta($prop->getDocComment());
 
-                                if (!$meta['exposed']) {
-                                    continue;
+                                    if (!$meta['exposed']) {
+                                        continue;
+                                    }
+
+                                    $propsMeta[$name] = $meta;
                                 }
-
-                                $propsMeta[$name] = $meta;
+                                $this->saveCache($fqcn, $propsMeta);
                             }
-                            $this->saveCache($fqcn, $propsMeta);
+                        }
+                        catch (\Throwable $ignored){
+
                         }
                     }
                 }

@@ -196,14 +196,18 @@ __HDR__;
 
                         $fqcn = str_replace('/', '\\', substr($pathName, $pathLen, -4));
 
-                        $ctlReflection = new \ReflectionClass($fqcn);
-                        if ($ctlReflection->isInstantiable()) {
-                            $methods = $ctlReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-                            foreach ($methods as $method) {
-                                if (substr($method->getName(), 0, 6) === 'action') {
-                                    $this->addToCache($rawCache, $method);
+                        try {
+                            $ctlReflection = new \ReflectionClass($fqcn);
+                            if ($ctlReflection->isInstantiable()) {
+                                $methods = $ctlReflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+                                foreach ($methods as $method) {
+                                    if (substr($method->getName(), 0, 6) === 'action') {
+                                        $this->addToCache($rawCache, $method);
+                                    }
                                 }
                             }
+                        }
+                        catch (\Throwable $ignored) {
                         }
                     }
                 }
