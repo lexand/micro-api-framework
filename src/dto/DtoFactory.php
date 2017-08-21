@@ -12,4 +12,6 @@ use Psr\Http\Message\StreamInterface;
 
 interface DtoFactory {
     public function createFromStream(string $class, StreamInterface $stream): DTO;
+
+    public function createFromData(string $class, array $data): DTO;
 }
