@@ -22,12 +22,28 @@ namespace microapi\dto;
  * Class DTO
  *
  * @package microapi\dto
- * @see \microapi\dto\DtoFactory
- * @see \microapi\dto\DtoFactoryDefault
+ * @see     \microapi\dto\DtoFactory
+ * @see     \microapi\dto\DtoFactoryDefault
  */
 abstract class DTO {
 
     private $_errors;
+
+    /**
+     * !WARNING:
+     * Constructor doesn't check types of values !!!
+     *
+     * @param array $fields
+     */
+    public function __construct(array $fields = []) {
+        $props = get_object_vars($this);
+
+        foreach ($props as $name => $defauls) {
+            if (array_key_exists($name, $fields)) {
+                $this->{$name} = $fields[$name];
+            }
+        }
+    }
 
     /**
      * low-level validation
