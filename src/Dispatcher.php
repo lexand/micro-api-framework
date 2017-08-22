@@ -41,7 +41,7 @@ class Dispatcher implements EventDriven {
     /**
      * @var string[]
      */
-    private $modulesNamespaces = [];
+    private $modules = [];
 
     /**
      * @var string
@@ -105,7 +105,7 @@ class Dispatcher implements EventDriven {
      * @return $this
      */
     public function addModule(string $module, string $ns, string $defaultController = null) {
-        $this->modulesNamespaces[$module] = $ns;
+        $this->modules[$module] = $ns;
 
         if (!empty($defaultController)) {
             $this->defaultControllers[$module] = $defaultController;
@@ -260,7 +260,7 @@ class Dispatcher implements EventDriven {
         // module or controller name
         $module = $tokenizer->next();
         if ($module !== null) {
-            if (isset($this->modulesNamespaces[$module])) {
+            if (isset($this->modules[$module])) {
                 $fqcnCtl = $this->ctlFqcn($module, $tokenizer->next());
             }
             else {
@@ -420,6 +420,6 @@ class Dispatcher implements EventDriven {
             $ctlName = ucfirst($this->defaultControllers[$module]);
         }
 
-        return $this->modulesNamespaces[$module] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
+        return $this->modules[$module] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
     }
 }
