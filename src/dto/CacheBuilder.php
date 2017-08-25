@@ -47,7 +47,12 @@ class CacheBuilder {
         foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
                 $pathLen = strlen($path) + 1;
-                $di      = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+                $di      = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator(
+                        $path,
+                        \RecursiveDirectoryIterator::SKIP_DOTS
+                    )
+                );
 
                 /** @var \SplFileInfo $fi */
                 foreach ($di as $fi) {
