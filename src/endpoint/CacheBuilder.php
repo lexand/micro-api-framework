@@ -170,7 +170,7 @@ __HDR__;
                 return $value ? 'true' : 'false';
             case is_string($value):
                 return '\'' . $value . '\'';
-            case is_null($value):
+            case (null === $value):
                 return 'null';
             case is_array($value):
                 return '[]';

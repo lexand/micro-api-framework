@@ -15,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
  * Class DtoFactorySimple
  *
  * - all public fields of DTO object may be filled by from input data, as this factory does not have any guard
- * mechanism fro that.
+ * mechanism for that.
  * - this factory does not support nested or objects (DTO or general)
  * - supports only array of scalars or arrays of associative arrays
  *

@@ -26,6 +26,7 @@ use microapi\http\DefaultResponseFactory;
 use microapi\http\HttpException;
 use microapi\http\WrappedResponse;
 use microapi\util\Tokenizer;
+use microapi\util\Type;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -155,28 +156,9 @@ class Dispatcher implements EventDriven {
      * - plugins support
      * - init plugins
      */
-    public function init() {
-        $this->trigger('init');
-    }
+    public function init() {$this->trigger('init');}
 
-    private static function castType($value, $buildInType) {
-        switch ($buildInType) {
-            case 'string':
-                return (string)$value;
-            case 'int':
-                return (int)$value;
-            case 'float':
-                return (float)$value;
-            case 'double':
-                return (double)$value;
-            case 'bool':
-                return (bool)$value;
-            default:
-                throw new \LogicException('incorrect type');
-        }
-    }
-
-    /**
+        /**
      * Perform real request
      *
      * @throws HttpException
@@ -360,7 +342,7 @@ class Dispatcher implements EventDriven {
                     $params[$paramName] = $meta['default'];
                 }
                 else {
-                    $params[$paramName] = self::castType($val, $meta['type']);
+                    $params[$paramName] = Type::cast($meta['type'], $val);
                 }
             }
             else {

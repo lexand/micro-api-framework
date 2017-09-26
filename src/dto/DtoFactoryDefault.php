@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace microapi\dto;
 
+use microapi\util\Type;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -141,7 +142,7 @@ class DtoFactoryDefault implements DtoFactory {
             throw new DtoFieldTypeMismatched("{$class} expects array for field `{$field}`` but got scalar or object");
         }
 
-        $obj->{$field} = $value;
+        $obj->{$field} = Type::cast($type, $value);
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
