@@ -40,5 +40,18 @@ class Type {
         }
     }
 
-    public static function isBuiltIn(string $type) : bool {return isset(self::$buildInTypes[$type]);}
+    public static function isBuiltIn(string $type): bool { return isset(self::$buildInTypes[$type]); }
+
+    public static function isArray(string $type, string &$elementType) : bool {
+        $res = (substr($type, -2) === '[]');
+        if ($res) {
+            $elementType = substr($type, 0, -2);
+
+            return true;
+        }
+
+        $elementType = $type;
+
+        return false;
+    }
 }

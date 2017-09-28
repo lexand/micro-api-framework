@@ -20,10 +20,7 @@ trait DtoTypeAnnotationTrait {
         $isArray = false;
         if (preg_match('/@var\s+([\w\\\]+(?:\[\])?)/', $docs, $matched)) {
             $type = $matched[1];
-            if (strrpos($type, '[]', -2)) {
-                $type    = substr($type, 0, -2);
-                $isArray = true;
-            }
+            $isArray = Type::isArray($type, $type);
         }
 
         $builtin = ($type !== null) ? Type::isBuiltIn($type) : false;
