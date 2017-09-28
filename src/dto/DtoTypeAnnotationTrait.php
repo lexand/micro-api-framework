@@ -9,17 +9,9 @@ declare(strict_types=1);
 
 namespace microapi\dto;
 
-trait DtoTypeAnnotationTrait {
+use microapi\util\Type;
 
-    private static $buildInTypes = [
-        'int'     => 1,
-        'integer' => 1,
-        'string'  => 1,
-        'float'   => 1,
-        'double'  => 1,
-        'bool'    => 1,
-        'boolean' => 1
-    ];
+trait DtoTypeAnnotationTrait {
 
     public static function annotatedMeta(string $docs): array {
         $matched = [];
@@ -34,7 +26,7 @@ trait DtoTypeAnnotationTrait {
             }
         }
 
-        $builtin = ($type !== null) ? isset(self::$buildInTypes[$type]) : false;
+        $builtin = ($type !== null) ? Type::isBuiltIn($type) : false;
         $isDto   = false;
         if (!$builtin) {
             try {

@@ -11,6 +11,16 @@ namespace microapi\util;
 
 class Type {
 
+    private static $buildInTypes = [
+        'int'     => 1,
+        'integer' => 1,
+        'string'  => 1,
+        'float'   => 1,
+        'double'  => 1,
+        'bool'    => 1,
+        'boolean' => 1
+    ];
+
     public static function cast(string $buildInType, $value) {
         switch ($buildInType) {
             case 'string':
@@ -30,4 +40,5 @@ class Type {
         }
     }
 
+    public static function isBuiltIn(string $type) : bool {return isset(self::$buildInTypes[$type]);}
 }
