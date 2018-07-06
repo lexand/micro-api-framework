@@ -45,6 +45,7 @@ class CacheBuilder {
 
     /**
      * @param string $cachePath Path where cache filed will be stored.
+     *
      * @return \microapi\endpoint\CacheBuilder
      */
     public static function create(string $cachePath): CacheBuilder { return new self($cachePath); }
@@ -57,6 +58,7 @@ class CacheBuilder {
      *
      * @param string $nsPrefix without leading and trailing slashes
      * @param array  $path
+     *
      * @return $this
      */
     public function addModulesNamespace(string $nsPrefix, array $path): CacheBuilder {
@@ -69,9 +71,9 @@ class CacheBuilder {
     /**
      * Base method for build endpoints cache
      */
-    public function build() { $this->saveCache($this->extractData()); }
+    public function build(): void { $this->saveCache($this->extractData()); }
 
-    private function addToCache(array &$cache, \ReflectionMethod $mr) {
+    private function addToCache(array &$cache, \ReflectionMethod $mr): void {
         $ctlFqcn            = $mr->class;
         $actionMethodName   = $mr->getName();
         $meta['methodName'] = $actionMethodName;
@@ -93,7 +95,7 @@ class CacheBuilder {
         }
     }
 
-    private function saveCache(array $rawCache) {
+    private function saveCache(array $rawCache): void {
         $pl1 = str_repeat($this->padding, 1);
         $pl2 = str_repeat($this->padding, 2);
         $pl3 = str_repeat($this->padding, 3);
@@ -121,7 +123,7 @@ class CacheBuilder {
         }
     }
 
-    private function writeHeader($fh) {
+    private function writeHeader($fh): void {
         //language=php
         $hdr = <<< __HDR__
 <?php
@@ -136,11 +138,11 @@ __HDR__;
         fwrite($fh, $hdr);
     }
 
-    private function writeParamsMeta($fh, array $paramsMeta) {
-        $pl3 = str_repeat($this->padding, 4);
-        $pl4 = str_repeat($this->padding, 5);
+    private function writeParamsMeta($fh, array $paramsMeta): void {
+        $pl3 = \str_repeat($this->padding, 4);
+        $pl4 = \str_repeat($this->padding, 5);
         foreach ($paramsMeta as $paramName => $paramMeta) {
-            fwrite($fh, sprintf("%s'%s' => [\n", $pl3, $paramName));
+            \fwrite($fh, \sprintf("%s'%s' => [\n", $pl3, $paramName));
 
             $isConst = false;
             if (isset($paramMeta['defaultIsConstant'])) {
@@ -150,29 +152,29 @@ __HDR__;
 
             foreach ($paramMeta as $key => $value) {
                 if ($isConst && ($key === 'default')) {
-                    fwrite($fh, sprintf("%s'%s' => %s,\n", $pl4, $key, $value));
+                    \fwrite($fh, \sprintf("%s'%s' => %s,\n", $pl4, $key, $value));
                     continue;
                 }
-                fwrite($fh, sprintf("%s'%s' => %s,\n", $pl4, $key, static::wrapBuiltInType($value)));
+                \fwrite($fh, \sprintf("%s'%s' => %s,\n", $pl4, $key, static::wrapBuiltInType($value)));
             }
 
-            fwrite($fh, sprintf("%s],\n", $pl3));
+            \fwrite($fh, \sprintf("%s],\n", $pl3));
         }
     }
 
     public static function wrapBuiltInType($value): string {
         switch (true) {
-            case is_int($value):
+            case \is_int($value):
                 return (string)$value;
-            case is_float($value):
+            case \is_float($value):
                 return (string)$value;
-            case is_bool($value):
+            case \is_bool($value):
                 return $value ? 'true' : 'false';
-            case is_string($value):
+            case \is_string($value):
                 return '\'' . $value . '\'';
             case (null === $value):
                 return 'null';
-            case is_array($value):
+            case \is_array($value):
                 return '[]';
             default:
                 throw new \LogicException('unsupported built-in type');
@@ -190,7 +192,7 @@ __HDR__;
 
         foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
-                $pathLen = strlen($path) + 1;
+                $pathLen = \strlen($path) + 1;
                 $di      = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator(
                         $path,
@@ -219,7 +221,7 @@ __HDR__;
 
                                 $methods = $r->getMethods(\ReflectionMethod::IS_PUBLIC);
                                 foreach ($methods as $method) {
-                                    if (substr($method->getName(), 0, 6) === 'action') {
+                                    if (0 === strpos($method->getName(), 'action')) {
                                         $this->addToCache($rawCache, $method);
                                     }
                                 }

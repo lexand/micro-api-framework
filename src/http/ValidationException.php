@@ -14,7 +14,7 @@ class ValidationException extends HttpException {
     /**
      * @var array
      */
-    private $errors = [];
+    private $errors;
 
     public function __construct(array $errors, $code = HttpException::EXPECTATION_FAILED, \Throwable $previous = null) {
         parent::__construct('', $code, $previous);

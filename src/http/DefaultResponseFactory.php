@@ -35,18 +35,19 @@ class DefaultResponseFactory implements ResponseFactory {
 
     /**
      * DefaultResponseFactory constructor.
-     * @param int    $status
-     * @param array  $headers
-     * @param null   $body
-     * @param string $version
-     * @param null   $reason
+     *
+     * @param int         $status
+     * @param array       $headers
+     * @param null        $body
+     * @param string      $version
+     * @param string|null $reason
      */
     public function __construct(
         int $status = 200,
         array $headers = [],
         $body = null,
         string $version = '1.1',
-        $reason = null
+        string $reason = null
     ) {
 
         $this->status  = $status;

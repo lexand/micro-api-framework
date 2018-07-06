@@ -25,15 +25,15 @@ trait Events {
      */
     public function on(string $event, array $f, bool $after = true) {
 
-        $event = strtolower($event);
+        $event = \strtolower($event);
 
         foreach ($f as $_f) {
-            if (is_callable($_f)) {
+            if (\is_callable($_f)) {
                 if ($after) {
                     $this->_e[$event][] = $_f;
                 }
                 else{
-                    array_unshift($this->_e[$event], $_f);
+                    \array_unshift($this->_e[$event], $_f);
                 }
             }
         }
@@ -42,7 +42,7 @@ trait Events {
     }
 
     public function trigger(string $event, Event $ef = null): Event {
-        $event = strtolower($event);
+        $event = \strtolower($event);
 
         if ($ef === null) {
             $ef = new Event();

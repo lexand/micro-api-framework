@@ -21,13 +21,13 @@ class Tokenizer {
      * @param int    $skip
      */
     public function __construct(string $src, string $delimiter, int $skip) {
-        $src = trim($src, $delimiter);
+        $src = \trim($src, $delimiter);
         if ($src === '') {
             $this->data = [];
         }
         else {
-            $data       = array_map('trim', explode($delimiter, $src));
-            $data       = array_slice($data, $skip);
+            $data       = \array_map('trim', \explode($delimiter, $src));
+            $data       = \array_slice($data, $skip);
             $this->data = $data;
         }
     }
@@ -35,7 +35,7 @@ class Tokenizer {
     /**
      * @return string|null
      */
-    public function next() {
+    public function next() : ?string {
         return array_shift($this->data);
     }
 }

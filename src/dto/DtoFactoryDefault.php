@@ -40,7 +40,7 @@ class DtoFactoryDefault implements DtoFactory {
     private $cachePath;
 
     public function createFromStream(string $class, StreamInterface $stream): DTO {
-        $fields = json_decode($stream->getContents(), true);
+        $fields = \json_decode($stream->getContents(), true);
 
         return $this->createFromData($class, $fields);
     }
@@ -64,10 +64,11 @@ class DtoFactoryDefault implements DtoFactory {
     /**
      * @param \microapi\dto\DTO $obj
      * @param array             $fields
+     *
      * @throws \microapi\dto\DtoFieldExposingException
      * @throws \microapi\dto\DtoFieldTypeMismatched
      */
-    public function fillObjViaReflection(DTO $obj, array $fields) {
+    public function fillObjViaReflection(DTO $obj, array $fields): void {
         $r     = new \ReflectionObject($obj);
         $props = $r->getProperties(\ReflectionProperty::IS_PUBLIC);
         foreach ($props as $prop) {
@@ -84,7 +85,7 @@ class DtoFactoryDefault implements DtoFactory {
         }
     }
 
-    public function fillObjViaMeta(DTO $obj, array $fields, array $fieldsMeta) {
+    public function fillObjViaMeta(DTO $obj, array $fields, array $fieldsMeta): void {
         foreach ($fieldsMeta as $name => $meta) {
             if (isset($fields[$name])) {
                 $this->fillField($obj, $fields, $meta, $name);
@@ -94,16 +95,17 @@ class DtoFactoryDefault implements DtoFactory {
 
     /**
      * @param string $class
+     *
      * @return array
      * @see \microapi\dto\CacheBuilder for details
      */
-    public function metaFor(string $class) {
+    public function metaFor(string $class): array {
         if (!isset($this->_c[$class])) {
 
             $file = $this->cachePath . '/';
-            $file .= str_replace('\\', '_', trim($class, '\\')) . '.php';
+            $file .= \str_replace('\\', '_', \trim($class, '\\')) . '.php';
 
-            if (file_exists($file)) {
+            if (\file_exists($file)) {
                 $this->_c[$class] = require $file;
             }
             else {
@@ -133,16 +135,26 @@ class DtoFactoryDefault implements DtoFactory {
      * @param string            $type    build in type (see \microapi\dto\DtoFactoryDefault::$buildInTypes)
      * @param bool              $isArray the value should be array of type $type or not
      * @param mixed             $value   scalar(builtin) or array of scalar values
+     *
      * @throws \microapi\dto\DtoFieldTypeMismatched
      * @see \microapi\dto\DtoFactoryDefault::$buildInTypes
      */
-    protected function builtin(DTO $obj, string $field, string $type, bool $isArray, $value) {
-        if ($isArray && !is_array($value)) {
-            $class = get_class($obj);
+    protected function builtin(DTO $obj, string $field, string $type, bool $isArray, $value): void {
+        if ($isArray && !\is_array($value)) {
+            $class = \get_class($obj);
             throw new DtoFieldTypeMismatched("{$class} expects array for field `{$field}`` but got scalar or object");
         }
 
-        $obj->{$field} = Type::cast($type, $value);
+        if ($isArray) {
+            $res = [];
+            foreach ($value as $item) {
+                $res[] = Type::cast($type, $item);
+            }
+            $obj->{$field} = $res;
+        }
+        else {
+            $obj->{$field} = Type::cast($type, $value);
+        }
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
@@ -152,11 +164,12 @@ class DtoFactoryDefault implements DtoFactory {
      * @param string            $class   class of the field
      * @param bool              $isArray should be array
      * @param mixed             $value
+     *
      * @throws \microapi\dto\DtoFieldTypeMismatched
      */
-    protected function dtoObject(DTO $obj, string $field, string $class, bool $isArray, $value) {
-        if ($isArray && !is_array($value)) {
-            $class = get_class($obj);
+    protected function dtoObject(DTO $obj, string $field, string $class, bool $isArray, $value): void {
+        if ($isArray && !\is_array($value)) {
+            $class = \get_class($obj);
             throw new DtoFieldTypeMismatched("{$class} expects array for field `{$field}`` but got scalar or object");
         }
 
@@ -179,11 +192,12 @@ class DtoFactoryDefault implements DtoFactory {
      * @param string            $class   class of the field
      * @param bool              $isArray should be array
      * @param mixed             $value
+     *
      * @throws \microapi\dto\DtoFieldTypeMismatched
      */
-    protected function generalObject(DTO $obj, string $field, string $class, bool $isArray, $value) {
-        if ($isArray && !is_array($value)) {
-            $class = get_class($obj);
+    protected function generalObject(DTO $obj, string $field, string $class, bool $isArray, $value): void {
+        if ($isArray && !\is_array($value)) {
+            $class = \get_class($obj);
             throw new DtoFieldTypeMismatched("{$class} expects array for field `{$field}`` but got scalar or object");
         }
 
@@ -204,13 +218,16 @@ class DtoFactoryDefault implements DtoFactory {
      * @param array             $fields
      * @param                   $meta
      * @param                   $name
+     *
      * @throws \microapi\dto\DtoFieldTypeMismatched
      * @throws \microapi\dto\DtoFieldExposingException
      */
-    public function fillField(DTO $obj, array $fields, $meta, $name) {
+    public function fillField(DTO $obj, array $fields, array $meta, string $name): void {
         if ($meta['type'] === null) {
-            $class = get_class($obj);
-            throw new DtoFieldExposingException("In class '{$class}', field '{$name}' annotated as @exposed but type is not specified");
+            $class = \get_class($obj);
+            throw new DtoFieldExposingException(
+                "In class '{$class}', field '{$name}' annotated as @exposed but type is not specified"
+            );
         }
 
         if ($meta['builtin']) {

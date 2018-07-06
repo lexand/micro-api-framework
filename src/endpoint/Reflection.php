@@ -72,7 +72,7 @@ class Reflection {
     }
 
     public static function isHttpMethodAllowed(string $method, \ReflectionMethod $mr): bool {
-        return in_array(strtolower($method), static::getActionHttpMethods($mr), true);
+        return \in_array(\strtolower($method), static::getActionHttpMethods($mr), true);
     }
 
     public static function getActionHttpMethods(\ReflectionMethod $mr): array {
@@ -82,7 +82,7 @@ class Reflection {
             $matches = [];
             preg_match('/@methods\s*\((.+?)\)/m', $doc, $matches);
 
-            if (count($matches) === 2) {
+            if (\count($matches) === 2) {
                 return array_map(
                     function (string $el): string {
                         return strtolower(trim($el));

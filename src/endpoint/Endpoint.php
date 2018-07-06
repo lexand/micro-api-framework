@@ -30,7 +30,7 @@ class Endpoint {
      */
     private $uri;
 
-    private $actionMeta = [];
+    private $actionMeta;
 
     /**
      * Endpoint constructor.
@@ -75,7 +75,7 @@ class Endpoint {
 
         $this->controller->beforeAction($this->getActionName(), $params);
 
-        $res = call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
+        $res = \call_user_func_array([$this->controller, $this->actionMeta['methodName']], $params);
 
         $res = $this->controller->afterAction($this->getActionName(), $res);
 

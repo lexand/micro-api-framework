@@ -24,7 +24,7 @@ use Psr\Http\Message\StreamInterface;
  */
 class DtoFactorySimple implements DtoFactory {
     public function createFromStream(string $class, StreamInterface $stream): DTO {
-        $fields = json_decode($stream->getContents(), true);
+        $fields = \json_decode($stream->getContents(), true);
 
         return $this->createFromData($class, $fields);
     }

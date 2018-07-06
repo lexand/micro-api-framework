@@ -5,5 +5,7 @@
 
 .idea/*
 *.iml
+*.ipr
+*.iws
 composer.lock
 vendor

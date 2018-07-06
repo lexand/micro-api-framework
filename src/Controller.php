@@ -49,7 +49,7 @@ class Controller implements EventDriven {
      * @param string $action
      * @param array  $params
      */
-    public function beforeAction(string $action, array $params = []) {
+    public function beforeAction(string $action, array $params = []): void {
         $this->trigger('beforeaction', new BeforeAction($this, $action, $params));
     }
 
@@ -59,6 +59,7 @@ class Controller implements EventDriven {
      *
      * @param string $action
      * @param mixed  $res action result
+     *
      * @return mixed
      */
     public function afterAction(string $action, $res) {
@@ -78,6 +79,7 @@ class Controller implements EventDriven {
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     *
      * @return static
      */
     public function setRequest(\Psr\Http\Message\ServerRequestInterface $request) {
@@ -99,6 +101,7 @@ class Controller implements EventDriven {
      * set initial internal state (future part of HTTP response)
      *
      * @param \Psr\Http\Message\ResponseInterface $response
+     *
      * @return static
      */
     public function setResponse(\Psr\Http\Message\ResponseInterface $response) {

@@ -31,6 +31,7 @@ class CacheBuilder {
      *
      * @param string $nsPrefix
      * @param array  $paths
+     *
      * @return \microapi\dto\CacheBuilder
      */
     public function addNamespace(string $nsPrefix, array $paths): CacheBuilder {
@@ -40,13 +41,13 @@ class CacheBuilder {
         return $this;
     }
 
-    public function build() {
+    public function build(): void {
 
         $processed = [];
 
         foreach ($this->namespaces as $nsPrefix => $paths) {
             foreach ($paths as $path) {
-                $pathLen = strlen($path) + 1;
+                $pathLen = \strlen($path) + 1;
                 $di      = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator(
                         $path,
@@ -63,7 +64,7 @@ class CacheBuilder {
 
                     if ($fi->getExtension() === 'php') {
 
-                        $fqcn = $nsPrefix . '\\' . str_replace('/', '\\', substr($pathName, $pathLen, -4));
+                        $fqcn = $nsPrefix . '\\' . \str_replace('/', '\\', \substr($pathName, $pathLen, -4));
 
                         try {
                             $r = new \ReflectionClass($fqcn);
@@ -102,13 +103,13 @@ class CacheBuilder {
         }
     }
 
-    private function saveCache(string $fqcn, array $propsMeta) {
+    private function saveCache(string $fqcn, array $propsMeta): void {
         $file = $this->path . '/';
-        $file .= str_replace('\\', '_', $fqcn) . '.php';
+        $file .= \str_replace('\\', '_', $fqcn) . '.php';
 
-        $tmpFile = $this->path . '/' . uniqid('dtocache', true);
+        $tmpFile = $this->path . '/' . \uniqid('dtocache', true);
 
-        $export = var_export($propsMeta, true);
+        $export = \var_export($propsMeta, true);
         $code   = <<< __PHP__
 <?php        
 /**
@@ -123,7 +124,7 @@ return {$export};
 __PHP__;
 
 
-        file_put_contents($tmpFile, $code);
-        rename($tmpFile, $file);
+        \file_put_contents($tmpFile, $code);
+        \rename($tmpFile, $file);
     }
 }

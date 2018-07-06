@@ -52,7 +52,7 @@ abstract class DTO {
      */
     public function validate(): bool { return true; }
 
-    public function addError(string $field, string $error) {
+    public function addError(string $field, string $error) : void {
         if (!isset($this->_errors[$field])) {
             $this->_errors[$field] = [];
         }

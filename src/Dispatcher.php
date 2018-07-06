@@ -24,6 +24,7 @@ use microapi\event\object\AfterDispatch;
 use microapi\event\object\BeforeDispatch;
 use microapi\http\DefaultResponseFactory;
 use microapi\http\HttpException;
+use microapi\http\ResponseFactory;
 use microapi\http\WrappedResponse;
 use microapi\util\Tokenizer;
 use microapi\util\Type;
@@ -103,9 +104,10 @@ class Dispatcher implements EventDriven {
      * @param string $module module name
      * @param string $ns     module namespace.
      * @param string $defaultController
+     *
      * @return $this
      */
-    public function addModule(string $module, string $ns, string $defaultController = null) {
+    public function addModule(string $module, string $ns, string $defaultController = null): Dispatcher {
         $this->modules[$module] = $ns;
 
         if (!empty($defaultController)) {
@@ -121,9 +123,10 @@ class Dispatcher implements EventDriven {
      *
      * @param string $ns
      * @param string $defaultController
+     *
      * @return $this
      */
-    public function addDefaultModule(string $ns, string $defaultController = null) {
+    public function addDefaultModule(string $ns, string $defaultController = null): Dispatcher {
         $this->addModule('__default', $ns, $defaultController);
 
         return $this;
@@ -131,6 +134,7 @@ class Dispatcher implements EventDriven {
 
     /**
      * @param string $cachePath
+     *
      * @return Dispatcher
      */
     public function setEndpointCachePath(string $cachePath): Dispatcher {
@@ -144,6 +148,7 @@ class Dispatcher implements EventDriven {
      * theses actions will not be visible to the Dispatcher
      *
      * @param bool $reflationAllowed
+     *
      * @return Dispatcher
      */
     public function setReflectionAllowed(bool $reflationAllowed): Dispatcher {
@@ -156,16 +161,16 @@ class Dispatcher implements EventDriven {
      * - plugins support
      * - init plugins
      */
-    public function init() {$this->trigger('init');}
+    public function init(): void { $this->trigger('init'); }
 
-        /**
+    /**
      * Perform real request
      *
      * @throws HttpException
      * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
      * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
      */
-    public function dispatch() {
+    public function dispatch(): void {
         try {
             $tokenizer = new Tokenizer($this->request->getUri()->getPath(), '/', $this->skipPathComponents);
 
@@ -179,10 +184,12 @@ class Dispatcher implements EventDriven {
 
             $params = $this->extractEndpointParams($tokenizer, $this->request->getBody(), $endpoint);
 
-            $this->afterDispatch($endpoint->invoke(
-                $this->getResponseFactory()->create(),
-                $params
-            ));
+            $this->afterDispatch(
+                $endpoint->invoke(
+                    $this->getResponseFactory()->create(),
+                    $params
+                )
+            );
         }
         catch (\Throwable $t) {
             $this->afterDispatch(new WrappedResponse($this->request, $t));
@@ -199,6 +206,7 @@ class Dispatcher implements EventDriven {
 
     /**
      * @param int $skipPathComponents
+     *
      * @return Dispatcher
      */
     public function setSkipPathComponents(int $skipPathComponents): Dispatcher {
@@ -216,7 +224,7 @@ class Dispatcher implements EventDriven {
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \microapi\endpoint\Endpoint              $endpoint
      */
-    private function beforeDispatch(ServerRequestInterface $request, Endpoint $endpoint) {
+    private function beforeDispatch(ServerRequestInterface $request, Endpoint $endpoint): void {
         $this->trigger('beforedispatch', new BeforeDispatch($request, $endpoint));
     }
 
@@ -228,17 +236,18 @@ class Dispatcher implements EventDriven {
      *
      * @param \microapi\http\WrappedResponse $data
      */
-    private function afterDispatch(WrappedResponse $data) {
+    private function afterDispatch(WrappedResponse $data): void {
         $this->trigger('afterdispatch', new AfterDispatch($data));
     }
 
     /**
      * @param \microapi\util\Tokenizer                 $tokenizer
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     *
      * @return \microapi\endpoint\Endpoint|null
      * @internal
      */
-    public function getEndpoint(Tokenizer $tokenizer, ServerRequestInterface $request) {
+    public function getEndpoint(Tokenizer $tokenizer, ServerRequestInterface $request): ?Endpoint {
         // module or controller name
         $module = $tokenizer->next();
         if ($module !== null) {
@@ -267,12 +276,13 @@ class Dispatcher implements EventDriven {
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param string                                   $fqcnCtl
      * @param string                                   $action
+     *
      * @return \microapi\endpoint\Endpoint|null
      * @throws \microapi\endpoint\exceptions\EndpointControllerNotFoundException
      * @throws \microapi\endpoint\exceptions\EndpointActionNotFoundException
      * @internal
      */
-    public function getEndpointFromCache(ServerRequestInterface $request, string $fqcnCtl, string $action) {
+    public function getEndpointFromCache(ServerRequestInterface $request, string $fqcnCtl, string $action): ?Endpoint {
         $method = strtolower($request->getMethod());
         if (empty($this->endPointCache[$method])) {
             $this->loadEndpointCache($method);
@@ -297,7 +307,7 @@ class Dispatcher implements EventDriven {
         return null;
     }
 
-    private function loadEndpointCache(string $method) {
+    private function loadEndpointCache(string $method): void {
         $filename = $this->endpointCachePath . "/endpoints_{$method}.php";
         if (file_exists($filename)) {
             $this->endPointCache[$method] = require $filename;
@@ -308,11 +318,15 @@ class Dispatcher implements EventDriven {
      * @param ServerRequestInterface $request
      * @param string                 $fqcnCtl
      * @param string                 $action
+     *
      * @return \microapi\endpoint\Endpoint|null
      * @throws \microapi\http\HttpException
      * @internal
      */
-    public function getEndpointFromReflection(ServerRequestInterface $request, string $fqcnCtl, string $action) {
+    public function getEndpointFromReflection(ServerRequestInterface $request,
+                                              string $fqcnCtl,
+                                              string $action
+    ): ?Endpoint {
         if ($this->reflectionAllowed) {
             try {
                 return (new Reflection($request, $fqcnCtl, $action))->getEndpoint();
@@ -329,6 +343,7 @@ class Dispatcher implements EventDriven {
      * @param \microapi\util\Tokenizer          $tokenizer
      * @param \Psr\Http\Message\StreamInterface $stream
      * @param \microapi\endpoint\Endpoint       $endpoint
+     *
      * @return array
      */
     public function extractEndpointParams(Tokenizer $tokenizer, StreamInterface $stream, Endpoint $endpoint): array {
@@ -361,7 +376,7 @@ class Dispatcher implements EventDriven {
         return $this->dtoFactory;
     }
 
-    public function setDtoFactory(\microapi\dto\DtoFactory $dtoFactory): Dispatcher {
+    public function setDtoFactory(DtoFactory $dtoFactory): Dispatcher {
         $this->dtoFactory = $dtoFactory;
 
         return $this;
@@ -370,7 +385,7 @@ class Dispatcher implements EventDriven {
     /**
      * @return \microapi\http\ResponseFactory
      */
-    public function getResponseFactory(): \microapi\http\ResponseFactory {
+    public function getResponseFactory(): ResponseFactory {
         if ($this->responseFactory === null) {
             $this->responseFactory = new DefaultResponseFactory();
         }
@@ -380,9 +395,10 @@ class Dispatcher implements EventDriven {
 
     /**
      * @param \microapi\http\ResponseFactory $responseFactory
+     *
      * @return static
      */
-    public function setResponseFactory(\microapi\http\ResponseFactory $responseFactory): Dispatcher {
+    public function setResponseFactory(ResponseFactory $responseFactory): Dispatcher {
         $this->responseFactory = $responseFactory;
 
         return $this;
@@ -391,13 +407,16 @@ class Dispatcher implements EventDriven {
     /**
      * @param string      $module
      * @param string|null $ctlName
+     *
      * @return string
      * @throws \LogicException
      */
     public function ctlFqcn(string $module, string $ctlName = null): string {
         if ($ctlName === null) {
             if (!isset($this->defaultControllers[$module])) {
-                throw new \LogicException("You request default controller from '{$module}' but default controller not specified");
+                throw new \LogicException(
+                    "You request default controller from '{$module}' but default controller not specified"
+                );
             }
             $ctlName = ucfirst($this->defaultControllers[$module]);
         }

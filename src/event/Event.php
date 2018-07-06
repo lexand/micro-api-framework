@@ -13,7 +13,7 @@ namespace microapi\event;
 class Event {
     private $stopped = false;
 
-    public function setStopped() { $this->stopped = true; }
+    public function setStopped(): void { $this->stopped = true; }
 
     public function isStopped(): bool { return $this->stopped; }
 }
