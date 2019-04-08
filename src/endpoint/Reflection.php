@@ -39,17 +39,17 @@ class Reflection {
     public function __construct(ServerRequestInterface $request, string $fqcnCtl, string $action) {
         $this->request = $request;
         $this->fqcnCtl = $fqcnCtl;
-        $this->action  = strtolower($action);
+        $this->action  = \strtolower($action);
     }
 
     public function getEndpoint(): Endpoint {
-        if (class_exists($this->fqcnCtl)) {
+        if (\class_exists($this->fqcnCtl)) {
             $ctl     = new $this->fqcnCtl();
             $ctlRefl = new \ReflectionObject($ctl);
             $found   = false;
             /** @var \ReflectionMethod $mr */
             foreach ($ctlRefl->getMethods(\ReflectionMethod::IS_PUBLIC) as $mr) {
-                if ($this->action === strtolower(substr($mr->getName(), 6))) {
+                if ($this->action === \strtolower(\substr($mr->getName(), 6))) {
                     $found = true;
                     break;
                 }
@@ -80,14 +80,14 @@ class Reflection {
 
         if ($doc !== false) {
             $matches = [];
-            preg_match('/@methods\s*\((.+?)\)/m', $doc, $matches);
+            \preg_match('/@methods\s*\((.+?)\)/m', $doc, $matches);
 
             if (\count($matches) === 2) {
-                return array_map(
-                    function (string $el): string {
-                        return strtolower(trim($el));
+                return \array_map(
+                    static function (string $el): string {
+                        return \strtolower(\trim($el));
                     },
-                    explode(',', $matches[1])
+                    \explode(',', $matches[1])
                 );
             }
         }

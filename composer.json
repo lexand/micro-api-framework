@@ -24,6 +24,7 @@
   },
   "require": {
     "php": ">=7.2",
+    "ext-json": "*",
     "psr/http-message": "1.*",
     "guzzlehttp/psr7": "1.*"
   },

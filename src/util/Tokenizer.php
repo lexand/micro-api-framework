@@ -26,7 +26,7 @@ class Tokenizer {
             $this->data = [];
         }
         else {
-            $data       = \array_map('trim', \explode($delimiter, $src));
+            $data       = \array_map('\trim', \explode($delimiter, $src));
             $data       = \array_slice($data, $skip);
             $this->data = $data;
         }
@@ -36,6 +36,6 @@ class Tokenizer {
      * @return string|null
      */
     public function next() : ?string {
-        return array_shift($this->data);
+        return \array_shift($this->data);
     }
 }

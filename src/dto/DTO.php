@@ -36,10 +36,10 @@ abstract class DTO {
      * @param array $fields
      */
     public function __construct(array $fields = []) {
-        $props = get_object_vars($this);
+        $props = \get_object_vars($this);
 
         foreach ($props as $name => $defauls) {
-            if (array_key_exists($name, $fields)) {
+            if (\array_key_exists($name, $fields)) {
                 $this->{$name} = $fields[$name];
             }
         }
@@ -65,10 +65,6 @@ abstract class DTO {
             return $this->_errors;
         }
 
-        if (isset($this->_errors[$field])) {
-            return $this->_errors[$field];
-        }
-
-        return [];
+        return $this->_errors[$field] ?? [];
     }
 }

@@ -31,9 +31,9 @@ class DtoFactorySimple implements DtoFactory {
 
     public function createFromData(string $class, array $data): DTO {
         $obj    = new $class;
-        $fields = get_object_vars($obj);
+        $fields = \get_object_vars($obj);
         foreach ($fields as $name) {
-            if (array_key_exists($name, $data)) {
+            if (\array_key_exists($name, $data)) {
                 $obj->{$name} = $data[$name];
             }
         }

@@ -172,12 +172,13 @@ class Dispatcher implements EventDriven {
      */
     public function dispatch(): void {
         try {
-            $tokenizer = new Tokenizer($this->request->getUri()->getPath(), '/', $this->skipPathComponents);
+            $uri       = $this->request->getUri();
+            $tokenizer = new Tokenizer($uri->getPath(), '/', $this->skipPathComponents);
 
             $endpoint = $this->getEndpoint($tokenizer, $this->request);
 
             if ($endpoint === null) {
-                throw new HttpException($_SERVER['REQUEST_URI'], HttpException::NOT_FOUND);
+                throw new HttpException((string)$uri, HttpException::NOT_FOUND);
             }
 
             $this->beforeDispatch($this->request, $endpoint);
@@ -196,7 +197,7 @@ class Dispatcher implements EventDriven {
         }
     }
 
-    public static function get(ServerRequestInterface $request = null) {
+    public static function get(ServerRequestInterface $request = null): Dispatcher {
         if (static::$instance === null) {
             static::$instance = new Dispatcher($request);
         }
@@ -283,14 +284,14 @@ class Dispatcher implements EventDriven {
      * @internal
      */
     public function getEndpointFromCache(ServerRequestInterface $request, string $fqcnCtl, string $action): ?Endpoint {
-        $method = strtolower($request->getMethod());
+        $method = \strtolower($request->getMethod());
         if (empty($this->endPointCache[$method])) {
             $this->loadEndpointCache($method);
         }
 
         if (isset($this->endPointCache[$method])) {
             $controllers = $this->endPointCache[$method];
-            if (isset($controllers[$fqcnCtl]) && class_exists($fqcnCtl)) {
+            if (isset($controllers[$fqcnCtl]) && \class_exists($fqcnCtl)) {
                 $actions = $controllers[$fqcnCtl];
                 if (isset($actions[$action])) {
                     return new Endpoint(
@@ -309,7 +310,7 @@ class Dispatcher implements EventDriven {
 
     private function loadEndpointCache(string $method): void {
         $filename = $this->endpointCachePath . "/endpoints_{$method}.php";
-        if (file_exists($filename)) {
+        if (\file_exists($filename)) {
             $this->endPointCache[$method] = require $filename;
         }
     }
@@ -418,9 +419,9 @@ class Dispatcher implements EventDriven {
                     "You request default controller from '{$module}' but default controller not specified"
                 );
             }
-            $ctlName = ucfirst($this->defaultControllers[$module]);
+            $ctlName = \ucfirst($this->defaultControllers[$module]);
         }
 
-        return $this->modules[$module] . '\controller\\' . ucfirst($ctlName) . 'Ctl';
+        return $this->modules[$module] . '\controller\\' . \ucfirst($ctlName) . 'Ctl';
     }
 }

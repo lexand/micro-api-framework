@@ -18,7 +18,7 @@ trait DtoTypeAnnotationTrait {
 
         $type    = null;
         $isArray = false;
-        if (preg_match('/@var\s+([\w\\\]+(?:\[\])?)/', $docs, $matched)) {
+        if (\preg_match('/@var\s+([\w\\\]+(?:\[\])?)/', $docs, $matched)) {
             $type = $matched[1];
             $isArray = Type::isArray($type, $type);
         }
@@ -43,7 +43,7 @@ trait DtoTypeAnnotationTrait {
             'isDto'   => $isDto,
             'isArray' => $isArray,
             'builtin' => $builtin,
-            'exposed' => preg_match('/@exposed/', $docs) >= 1
+            'exposed' => \preg_match('/@exposed/', $docs) >= 1
         ];
 
         return $res;

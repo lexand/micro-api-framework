@@ -52,7 +52,7 @@ class Endpoint {
 
     public function getActionMethod(): string { return $this->actionMeta['methodName']; }
 
-    public function getActionName(): string { return strtolower(substr($this->actionMeta['methodName'], 6)); }
+    public function getActionName(): string { return \strtolower(\substr($this->actionMeta['methodName'], 6)); }
 
     public function getParamsMeta(): array { return $this->actionMeta['paramsMeta']; }
 

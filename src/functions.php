@@ -12,11 +12,11 @@ use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\Psr7\copy_to_string;
 
 function send_response(ResponseInterface $r) {
-    header('HTTP/' . $r->getProtocolVersion() . ' ' . $r->getStatusCode() . ' ' . $r->getReasonPhrase());
+    \header('HTTP/' . $r->getProtocolVersion() . ' ' . $r->getStatusCode() . ' ' . $r->getReasonPhrase());
 
     foreach ($r->getHeaders() as $name => $values) {
         foreach ($values as $value) {
-            header(sprintf('%s: %s', $name, $value), false);
+            \header(\sprintf('%s: %s', $name, $value), false);
         }
     }
 

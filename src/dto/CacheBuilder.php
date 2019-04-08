@@ -35,7 +35,7 @@ class CacheBuilder {
      * @return \microapi\dto\CacheBuilder
      */
     public function addNamespace(string $nsPrefix, array $paths): CacheBuilder {
-        $nsPrefix                    = trim($nsPrefix, '\\');
+        $nsPrefix                    = \trim($nsPrefix, '\\');
         $this->namespaces[$nsPrefix] = $paths;
 
         return $this;

@@ -62,7 +62,7 @@ class CacheBuilder {
      * @return $this
      */
     public function addModulesNamespace(string $nsPrefix, array $path): CacheBuilder {
-        $nsPrefix                    = trim($nsPrefix, '\\');
+        $nsPrefix                    = \trim($nsPrefix, '\\');
         $this->namespaces[$nsPrefix] = $path;
 
         return $this;
@@ -77,8 +77,8 @@ class CacheBuilder {
         $ctlFqcn            = $mr->class;
         $actionMethodName   = $mr->getName();
         $meta['methodName'] = $actionMethodName;
-        $meta['paramsMeta'] = Reflection::getParamsMeta($mr, false);
-        $actionMethodName   = strtolower(substr($actionMethodName, 6));
+        $meta['paramsMeta'] = Reflection::getParamsMeta($mr);
+        $actionMethodName   = \strtolower(\substr($actionMethodName, 6));
 
         foreach (Reflection::getActionHttpMethods($mr) as $httpMethod) {
             if (!isset($cache[$httpMethod])) {
@@ -96,30 +96,30 @@ class CacheBuilder {
     }
 
     private function saveCache(array $rawCache): void {
-        $pl1 = str_repeat($this->padding, 1);
-        $pl2 = str_repeat($this->padding, 2);
-        $pl3 = str_repeat($this->padding, 3);
+        $pl1 = \str_repeat($this->padding, 1);
+        $pl2 = \str_repeat($this->padding, 2);
+        $pl3 = \str_repeat($this->padding, 3);
         foreach ($rawCache as $httpMethod => $controllersData) {
-            $fh = fopen($this->cachePath . '/endpoints_' . $httpMethod . '.php', 'wb');
+            $fh = \fopen($this->cachePath . '/endpoints_' . $httpMethod . '.php', 'wb');
 
             $this->writeHeader($fh);
-            fwrite($fh, "return [\n");
+            \fwrite($fh, "return [\n");
 
             foreach ($controllersData as $ctlFqcn => $actionsData) {
-                fwrite($fh, sprintf("%s'%s' => [\n", $pl1, $ctlFqcn));
+                \fwrite($fh, \sprintf("%s'%s' => [\n", $pl1, $ctlFqcn));
                 foreach ($actionsData as $action => $actionMeta) {
-                    fwrite($fh, sprintf("%s'%s' => [\n", $pl2, $action));
-                    fwrite($fh, sprintf("%s'methodName' => %s,\n", $pl3, "'{$actionMeta['methodName']}'"));
-                    fwrite($fh, sprintf("%s'paramsMeta' => [\n", $pl3));
+                    \fwrite($fh, \sprintf("%s'%s' => [\n", $pl2, $action));
+                    \fwrite($fh, \sprintf("%s'methodName' => %s,\n", $pl3, "'{$actionMeta['methodName']}'"));
+                    \fwrite($fh, \sprintf("%s'paramsMeta' => [\n", $pl3));
                     $this->writeParamsMeta($fh, $actionMeta['paramsMeta']);
-                    fwrite($fh, sprintf("%s],\n", $pl3));
-                    fwrite($fh, sprintf("%s],\n", $pl2));
+                    \fwrite($fh, \sprintf("%s],\n", $pl3));
+                    \fwrite($fh, \sprintf("%s],\n", $pl2));
                 }
-                fwrite($fh, sprintf("%s],\n", $pl1));
+                \fwrite($fh, \sprintf("%s],\n", $pl1));
             }
 
-            fwrite($fh, "];\n");
-            fclose($fh);
+            \fwrite($fh, "];\n");
+            \fclose($fh);
         }
     }
 
@@ -135,7 +135,7 @@ class CacheBuilder {
 
 
 __HDR__;
-        fwrite($fh, $hdr);
+        \fwrite($fh, $hdr);
     }
 
     private function writeParamsMeta($fh, array $paramsMeta): void {
@@ -206,9 +206,9 @@ __HDR__;
                     }
                     $pathName = $fi->getPathname();
 
-                    if (substr($pathName, -7) === 'Ctl.php') {
+                    if (\substr($pathName, -7) === 'Ctl.php') {
 
-                        $fqcn = $nsPrefix . '\\' . str_replace('/', '\\', substr($pathName, $pathLen, -4));
+                        $fqcn = $nsPrefix . '\\' . \str_replace('/', '\\', \substr($pathName, $pathLen, -4));
 
                         try {
                             $r = new \ReflectionClass($fqcn);
@@ -221,7 +221,7 @@ __HDR__;
 
                                 $methods = $r->getMethods(\ReflectionMethod::IS_PUBLIC);
                                 foreach ($methods as $method) {
-                                    if (0 === strpos($method->getName(), 'action')) {
+                                    if (0 === \strpos($method->getName(), 'action')) {
                                         $this->addToCache($rawCache, $method);
                                     }
                                 }
