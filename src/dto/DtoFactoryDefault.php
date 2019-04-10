@@ -22,7 +22,7 @@ use Psr\Http\Message\StreamInterface;
  * will throw exception DtoFieldExposingException. Fields without @exposed will be meant as auxiliary.
  * - DTO class supports nesting of DTO and general objects. Nested DTO objects will instantiated with the same
  * DtoFactory. General objects will be created as "new $class($rawData)"
- * - DTO supports fields with arrayed type (array od scalars/objects)
+ * - DTO supports fields with arrayed type (array of scalars/objects)
  *
  *
  * @package microapi\dto
